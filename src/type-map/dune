@@ -1,0 +1,9 @@
+
+(library
+  (name TypeMap)
+  (public_name milk.TypeMap)
+  (libraries ReasonLanguageServer.Analyze ReasonLanguageServer.Util ReasonLanguageServer.Vendor compiler-libs.common ocaml-migrate-parsetree ppx_tools ppx_tools.metaquot)
+  (flags :standard -w -9 -open Util)
+  (preprocess (pps ReasonLanguageServer.Belt_ppx ReasonLanguageServer.Ppx_monads ppx_tools.metaquot))
+  )
+

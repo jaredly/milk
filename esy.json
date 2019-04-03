@@ -1,0 +1,38 @@
+{
+  "name": "milk",
+  "version": "0.0.0-dont-publish",
+  "private": true,
+  "scripts": {
+    "types": "./_esy/default/build/install/default/bin/type-digger type-digger/types.json"
+  },
+  "keywords": [
+    "Reason",
+    "lsp",
+    "IDE"
+  ],
+  "repository": {
+    "url": "jaredly/reason-language-server",
+    "type": "git"
+  },
+  "description": "A pure-reason implementation of a language server",
+  "author": "Jared Forsyth",
+  "license": "ISC",
+  "esy": {
+    "build": "dune build -p #{self.name}",
+    "buildsInSource": "_build"
+  },
+  "dependencies": {
+    "@opam/dune": "*",
+    "@esy-ocaml/reason": "*",
+    "@opam/ocaml-migrate-parsetree": "*",
+    "@opam/ppx_tools_versioned": "*",
+    "@opam/ppx_tools": "*",
+    "@opam/ppxlib": "*",
+    "rex-json": "*",
+    "ReasonLanguageServer": "*",
+    "ocaml": "~4.7.2"
+  },
+  "resolutions": {
+    "ReasonLanguageServer": "link:../reason-language-server"
+  }
+}
