@@ -18,17 +18,18 @@
   "author": "Jared Forsyth",
   "license": "ISC",
   "esy": {
-    "build": "dune build -p #{self.name}",
-    "buildsInSource": "_build"
+    "build": "dune build -p #{self.name}"
+    // "buildsInSource": "_build"
   },
   "dependencies": {
-    "@opam/dune": "*",
+    "@opam/dune": "<1.7",
     "@esy-ocaml/reason": "*",
     "@opam/ocaml-migrate-parsetree": "*",
     "@opam/ppx_tools_versioned": "*",
     "@opam/ppx_tools": "*",
     "@opam/ppxlib": "*",
     "rex-json": "*",
+    "@opam/utop": ">=2.0",
     "ReasonLanguageServer": "*",
     "ocaml": "~4.7.2"
   },
