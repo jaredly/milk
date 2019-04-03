@@ -1,9 +1,9 @@
 
-(executable
-  (name TypeDigger)
-  (public_name type-digger)
+(library
+  (public_name milk)
+  ; (public_name milk)
   (libraries ReasonLanguageServer.Util TypeMap Serde TypeMapSerde reason compiler-libs.common ocaml-migrate-parsetree ppx_tools.metaquot)
-  (flags :standard -open Util -w -9-58)
+  (flags :standard -open Util -w -A)
   (preprocess (pps ReasonLanguageServer.Belt_ppx ReasonLanguageServer.Ppx_monads ppxlib.metaquot))
   )
 

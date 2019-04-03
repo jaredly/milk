@@ -16,7 +16,7 @@ let sourceToJson = source => switch source {
 let rec toJson = (sourceToJson, t) => switch t {
   | Variable(string) => l([s("Variable"), s(string)])
   | AnonVariable => s("AnonVariable")
-  | RowVariant(rows, closed) => l([s("RowVariant"), l(rows->Belt.List.map(((label, expr)) => {
+  | RowVariant(rows, _closed) => l([s("RowVariant"), l(rows->Belt.List.map(((label, expr)) => {
     o([
       ("label", s(label)),
       ("arg", switch expr {
