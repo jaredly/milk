@@ -94,15 +94,19 @@ let loadTypeMap = config => {
 // let isSerializationAttribute = (({Location.txt}, _)) => Util.Utils.startsWith(txt, "rename.");
 
 let makeLockfilePath = configPath => {
-  let base = Filename.dirname(configPath);
-  let name = Filename.basename(configPath);
-  let parts = String.split_on_char('.', name);
-  let newName =
-    switch (parts) {
-    | [single, ..._] => single ++ ".lock.json"
-    | [] => "lockfile.json"
-    };
-  Filename.concat(base, newName);
+  switch configPath {
+    | `Nested(name) => "types.lock.json"
+    | `Top(configPath) =>
+      let base = Filename.dirname(configPath);
+      let name = Filename.basename(configPath);
+      let parts = String.split_on_char('.', name);
+      let newName =
+        switch (parts) {
+        | [single, ..._] => single ++ ".lock.json"
+        | [] => "lockfile.json"
+        };
+      Filename.concat(base, newName);
+  }
 };
 
 let outputStructure = (~fileName, ~structure) => {
@@ -119,8 +123,8 @@ let outputStructure = (~fileName, ~structure) => {
   Files.writeFile(fileName, Format.flush_str_formatter()) |> ignore;
 };
 
-let main = (~upvert=false, ~override=false, configPath) => {
-  let json = Json.parse(Util.Files.readFileExn(configPath));
+let main = (~upvert=false, ~override=false, ~json, configPath) => {
+  // let json = Json.parse(Util.Files.readFileExn(configPath));
   let%try_force config =
     switch (TypeMapSerde.configFromJson(json)) {
     | Error(m) => Error(String.concat("::", m))
@@ -250,11 +254,4 @@ let main = (~upvert=false, ~override=false, configPath) => {
 
   let lockfileJson = TypeMapSerde.lockfileToJson(lockfile);
   Files.writeFileExn(lockFilePath, Json.stringifyPretty(~indent=2, lockfileJson));
-};
-
-switch (Sys.argv->Belt.List.fromArray) {
-| [_, config] => main(config)
-| [_, config, "--override"] => main(~override=true, config)
-| [_, config, "--upvert"] => main(~upvert=true, config)
-| _ => failwith("Bad args")
 };

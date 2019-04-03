@@ -9,7 +9,11 @@ let checkVersion = (~upvert, ~configPath, config, json) => {
   switch (version) {
   | Ok((version, _)) when version != Serde.currentVersion =>
     if (upvert) {
-      Util.Files.writeFileExn(configPath, Vendor.Json.stringifyPretty(configToJson(config)));
+      switch configPath {
+        | `Nested(otherPath) => print_endline("Unable to upvert nested config just yet")
+        | `Top(configPath) =>
+          Util.Files.writeFileExn(configPath, Vendor.Json.stringifyPretty(configToJson(config)));
+      }
     } else {
       print_endline("Notice: You're using an outdated config schema. To upvert, pass --upvert.");
     }
