@@ -3,7 +3,7 @@
   "version": "0.0.0-dont-publish",
   "private": true,
   "scripts": {
-    "types": "./_esy/default/build/install/default/bin/type-digger type-digger/types.json"
+    "types": "dune exe milk"
   },
   "keywords": [
     "Reason",
@@ -18,8 +18,8 @@
   "author": "Jared Forsyth",
   "license": "ISC",
   "esy": {
-    "build": "dune build -p #{self.name}"
-    // "buildsInSource": "_build"
+    "build": "dune build -p #{self.name}",
+    "buildsInSource": "_build"
   },
   "dependencies": {
     "@opam/dune": "<1.7",
