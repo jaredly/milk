@@ -9,7 +9,7 @@ let run = (~rootPath, ~filterPath, modify) => {
     autoRebuild: false,
   }};
   print_endline("Setting up a package");
-  let%try_force package = Analyze.State.newPackageForRoot(~reportDiagnostics=(_, _) => (), state, root);
+  let%try_force package = Analyze.Packages.newPackageForRoot(~reportDiagnostics=(_, _) => (), state, root);
   let%opt_force (buildCommand, _) = package.buildCommand;
   print_endline("Running build command (for freshness) " ++ buildCommand);
   let (stdout, stderr, success) = Commands.execFull(~pwd=root, buildCommand);

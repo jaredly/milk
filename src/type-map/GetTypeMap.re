@@ -118,7 +118,7 @@ let splitFull = fullName => {
 };
 
 let fileToReference = (~state, uri, fullName) => {
-  let%try package = State.getPackage(~reportDiagnostics=(_, _) => (), uri, state);
+  let%try package = Packages.getPackage(~reportDiagnostics=(_, _) => (), uri, state);
   let (path, name) = splitFull(fullName);
   let getModuleName = uri => {
     let%opt path = Utils.parseUri(uri);
@@ -129,7 +129,7 @@ let fileToReference = (~state, uri, fullName) => {
 };
 
 let forInitialType = (~tbl, ~state, uri, fullName) => {
-  let%try package = State.getPackage(~reportDiagnostics=(_, _) => (), uri, state);
+  let%try package = Packages.getPackage(~reportDiagnostics=(_, _) => (), uri, state);
   /* print_endline("Got package..."); */
   let%try (file, _) = State.fileForUri(state, ~package, uri);
   let env = Query.fileEnv(file);
