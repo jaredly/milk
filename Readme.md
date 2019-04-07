@@ -1,9 +1,7 @@
 
 # Milk 🥛 : Stress-free serialization & deserialization for Reason/OCaml
 
-## Stability: settling
-This is recently released, still settling down API n stuff, but I plan to maintain backwards compatability.
-Also I'm still working on documentation, so some things might be missing or unclear.
+🚧 **Stability: settling** 🚧 This is recently released, still settling down API n stuff, but I plan to maintain backwards compatability. Also I'm still working on documentation, so some things might be missing or unclear.
 
 ```
 Usage: milk [config file] [options]

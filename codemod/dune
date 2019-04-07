@@ -1,7 +1,7 @@
 (library
   (name Codemod)
   (public_name milk.Codemod)
-  (libraries ReasonLanguageServer.Analyze ReasonLanguageServer.Util TypeMap compiler-libs.common ocaml-migrate-parsetree reason)
+  (libraries reason-language-server.Analyze reason-language-server.Util TypeMap compiler-libs.common ocaml-migrate-parsetree reason)
   (flags :standard -open Util -w -9)
-  (preprocess (pps ReasonLanguageServer.Belt_ppx ReasonLanguageServer.Ppx_monads ppxlib.metaquot))
+  (preprocess (pps reason-language-server.Belt_ppx reason-language-server.Ppx_monads ppxlib.metaquot))
   )

@@ -2,9 +2,9 @@
 (library
   (name TypeMapSerde)
   (public_name milk.TypeMapSerde)
-  (libraries TypeMap ReasonLanguageServer.Analyze ReasonLanguageServer.Util ReasonLanguageServer.Vendor compiler-libs.common ocaml-migrate-parsetree)
+  (libraries TypeMap reason-language-server.Analyze reason-language-server.Util reason-language-server.Vendor compiler-libs.common ocaml-migrate-parsetree)
   (flags :standard -w -A -open Vendor -open Util)
-  (preprocess (pps ReasonLanguageServer.Belt_ppx ReasonLanguageServer.Ppx_monads ppx_tools_versioned.metaquot_406))
+  (preprocess (pps reason-language-server.Belt_ppx reason-language-server.Ppx_monads ppx_tools_versioned.metaquot_406))
   )
 
 

@@ -1,7 +1,6 @@
 {
   "name": "milk",
   "version": "0.0.0-dont-publish",
-  "private": true,
   "scripts": {
     "types": "dune exe milk"
   },
@@ -30,10 +29,10 @@
     "@opam/ppxlib": "*",
     "rex-json": "*",
     "@opam/utop": ">=2.0",
-    "ReasonLanguageServer": "*",
+    "reason-language-server": "*",
     "ocaml": "~4.7.2"
   },
   "resolutions": {
-    "ReasonLanguageServer": "link:../reason-language-server"
+    "reason-language-server": "link:../reason-language-server"
   }
 }
