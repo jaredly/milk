@@ -1,5 +1,5 @@
 {
-  "name": "milk",
+  "name": "@jaredly/milk",
   "version": "1.0.0",
   "scripts": {
     "types": "dune exe milk"
@@ -17,7 +17,7 @@
   "author": "Jared Forsyth",
   "license": "ISC",
   "esy": {
-    "build": "dune build -p #{self.name}",
+    "build": "dune build -p milk",
     "buildsInSource": "_build"
   },
   "dependencies": {
