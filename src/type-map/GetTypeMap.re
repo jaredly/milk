@@ -4,19 +4,25 @@ open DigTypes;
 
 let getType = (~env: Query.queryEnv, name) => {
   open Infix;
-  Query.hashFind(env.exported.types, name) |?> stamp => Query.hashFind(env.file.stamps.types, stamp)
+  let%try stamp =
+    Query.hashFind(env.exported.types, name)
+    |> RResult.orError(
+         "No exported type " ++ name ++ " in module " ++ env.file.uri ++ " " ++ (Stdlib.Hashtbl.to_seq_keys(env.exported.types)->Stdlib.List.of_seq |> String.concat(",")),
+       );
+  Query.hashFind(env.file.stamps.types, stamp) |> RResult.orError("Invalid stamp for " ++ name)
 };
 
 let isBuiltin = fun
   | "list" | "string" | "option" | "int" | "float" | "bool" | "array" => true
   | _ => false;
+
 let rec getFullType_ = (env, path, name) => switch path {
   | [] => getType(~env, name)
   | [one, ...more] =>
-    let%opt modStamp = Query.hashFind(env.exported.modules, one);
-    let%opt declared = Query.hashFind(env.file.stamps.modules, modStamp);
+    let%try modStamp = Query.hashFind(env.exported.modules, one) |> RResult.orError("No exported module " ++ one);
+    let%try declared = Query.hashFind(env.file.stamps.modules, modStamp) |> RResult.orError("Unexpected stamp " ++ string_of_int(modStamp));
     switch (declared.contents) {
-      | Ident(_) => None
+      | Ident(_) => Error("Expected a module, but " ++ one ++ " was an identifier")
       | Structure(contents) =>
         getFullType_({...env, exported: contents.exported}, more, name)
     }
@@ -25,7 +31,6 @@ let rec getFullType_ = (env, path, name) => switch path {
 let getFullType = (~env: Query.queryEnv, path, name) => {
   getFullType_(env, path, name)
 };
-
 
 let mapSource = (~env, ~getModule, path) => {
     let resolved = Query.resolveFromCompilerPath(~env, ~getModule, path);
@@ -47,7 +52,10 @@ let mapSource = (~env, ~getModule, path) => {
           | Some(decl) => Some((decl, env))
         }
          /* |?>> (d => (d, env.file)) */
-      | `Exported(env, name) => getType(~env, name) |?>> (d => (d, env))
+      | `Exported(env, name) => switch (getType(~env, name)) {
+        | Error(_) => None
+        | Ok(d) => Some((d, env))
+      }
       };
     switch (declared) {
     | None => switch path {
@@ -134,7 +142,7 @@ let forInitialType = (~tbl, ~state, uri, fullName) => {
   let%try (file, _) = State.fileForUri(state, ~package, uri);
   let env = Query.fileEnv(file);
   let (path, name) = splitFull(fullName);
-  let%try declared = getFullType(~env, path, name) |> RResult.orError("No declared type named " ++ fullName);
+  let%try declared = getFullType(~env, path, name);
   let getModule = State.fileForModule(state, ~package);
   // For debugging module resolution
   // let getModule = path => {
