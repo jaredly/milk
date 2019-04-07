@@ -2258,38 +2258,11 @@
                         ],
                         [
                           "two",
-                          [
-                            "Reference",
-                            [
-                              "Builtin",
-                              "int"
-                            ],
-                            []
-                          ]
+                          null
                         ],
                         [
                           "three",
-                          [
-                            "Tuple",
-                            [
-                              [
-                                "Reference",
-                                [
-                                  "Builtin",
-                                  "float"
-                                ],
-                                []
-                              ],
-                              [
-                                "Reference",
-                                [
-                                  "Builtin",
-                                  "string"
-                                ],
-                                []
-                              ]
-                            ]
-                          ]
+                          null
                         ]
                       ],
                       true

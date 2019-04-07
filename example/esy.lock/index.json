@@ -1,0 +1,33 @@
+{
+  "checksum": "c86bc5e0697caac1f7f39febcd65dee4",
+  "root": "example@link-dev:./package.json",
+  "node": {
+    "example@link-dev:./package.json": {
+      "id": "example@link-dev:./package.json",
+      "name": "example",
+      "version": "link-dev:./package.json",
+      "source": {
+        "type": "link-dev",
+        "path": ".",
+        "manifest": "package.json"
+      },
+      "overrides": [],
+      "dependencies": [ "bs-platform@4.0.18@d41d8cd9" ],
+      "devDependencies": []
+    },
+    "bs-platform@4.0.18@d41d8cd9": {
+      "id": "bs-platform@4.0.18@d41d8cd9",
+      "name": "bs-platform",
+      "version": "4.0.18",
+      "source": {
+        "type": "install",
+        "source": [
+          "archive:https://registry.npmjs.org/bs-platform/-/bs-platform-4.0.18.tgz#sha1:d17b8693ba1f714d9b27e0ddb365f2069ba4b8a0"
+        ]
+      },
+      "overrides": [],
+      "dependencies": [],
+      "devDependencies": []
+    }
+  }
+}

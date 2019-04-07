@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "bs-platform": "^4.0.7"
+  },
+  "scripts": {
+    "start": "../_build/install/default/bin/milk types.json",
+    "kitchen": "../_build/install/default/bin/milk multi-types.json",
+    "try": "bsb -make-world && node ./src/App.bs.js",
+    "build": "bsb -make-world"
+  }
+}

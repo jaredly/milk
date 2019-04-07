@@ -336,7 +336,7 @@ module Types7 = {
     Types.person = {
       name: string,
       age: float,
-      thing: [ | `one | `two(int) | `three(float, string)],
+      thing: [ | `one | `two | `three],
       coords: (float, float),
     }
   and _Types__pet = Types.pet = | Dog | Cat | Mouse
@@ -414,11 +414,7 @@ module Types7 = {
       let _converted_name = _input_data.name;
       let _converted_age = _input_data.age;
       let _converted_thing =
-        (
-          _ => `one:
-            Types6._Types__person =>
-            [ | `one | `two(int) | `three(float, string)]
-        )(
+        (_ => `one: Types6._Types__person => [ | `one | `two | `three])(
           _input_data,
         );
       let _converted_coords = {
@@ -2190,76 +2186,13 @@ module Version7 = {
                   | JSONArray([|tag|])
                       when Js.Json.JSONString("one") == Js.Json.classify(tag) =>
                     Belt.Result.Ok(`one)
-                  | JSONArray([|tag, arg0|])
+                  | JSONArray([|tag|])
                       when Js.Json.JSONString("two") == Js.Json.classify(tag) =>
-                    switch (
-                      (
-                        number =>
-                          switch (Js.Json.classify(number)) {
-                          | JSONNumber(number) =>
-                            Belt.Result.Ok(int_of_float(number))
-                          | _ => Error(["Expected a float"])
-                          }
-                      )(
-                        arg0,
-                      )
-                    ) {
-                    | Belt.Result.Ok(arg) => Belt.Result.Ok(`two(arg))
-                    | Error(error) => Belt.Result.Error(error)
-                    }
-                  | JSONArray([|tag, arg0|])
+                    Belt.Result.Ok(`two)
+                  | JSONArray([|tag|])
                       when
                         Js.Json.JSONString("three") == Js.Json.classify(tag) =>
-                    switch (
-                      (
-                        json =>
-                          switch (Js.Json.classify(json)) {
-                          | JSONArray([|arg0, arg1|]) =>
-                            switch (
-                              (
-                                string =>
-                                  switch (Js.Json.classify(string)) {
-                                  | JSONString(string) =>
-                                    Belt.Result.Ok(string)
-                                  | _ => Error(["expected a string"])
-                                  }
-                              )(
-                                arg1,
-                              )
-                            ) {
-                            | Belt.Result.Ok(arg1) =>
-                              switch (
-                                (
-                                  number =>
-                                    switch (Js.Json.classify(number)) {
-                                    | JSONNumber(number) =>
-                                      Belt.Result.Ok(number)
-                                    | _ => Error(["Expected a float"])
-                                    }
-                                )(
-                                  arg0,
-                                )
-                              ) {
-                              | Belt.Result.Ok(arg0) =>
-                                Belt.Result.Ok((arg0, arg1))
-                              | Error(error) =>
-                                Belt.Result.Error([
-                                  "tuple element 0",
-                                  ...error,
-                                ])
-                              }
-                            | Error(error) =>
-                              Belt.Result.Error(["tuple element 1", ...error])
-                            }
-                          | _ => Belt.Result.Error(["Expected an array"])
-                          }
-                      )(
-                        arg0,
-                      )
-                    ) {
-                    | Belt.Result.Ok(arg) => Belt.Result.Ok(`three(arg))
-                    | Error(error) => Belt.Result.Error(error)
-                    }
+                    Belt.Result.Ok(`three)
                   | _ => Belt.Result.Error(["Expected an array"])
                   }
               )(
@@ -2493,24 +2426,8 @@ module Version7 = {
               constructor =>
                 switch (constructor) {
                 | `one => Js.Json.array([|Js.Json.string("one")|])
-                | `two(arg) =>
-                  Js.Json.array([|
-                    Js.Json.string("two"),
-                    (int => Js.Json.number(float_of_int(int)))(arg),
-                  |])
-                | `three(arg) =>
-                  Js.Json.array([|
-                    Js.Json.string("three"),
-                    (
-                      ((arg0, arg1)) =>
-                        Js.Json.array([|
-                          Js.Json.number(arg0),
-                          Js.Json.string(arg1),
-                        |])
-                    )(
-                      arg,
-                    ),
-                  |])
+                | `two => Js.Json.array([|Js.Json.string("two")|])
+                | `three => Js.Json.array([|Js.Json.string("three")|])
                 }
             )(
               record.thing,
