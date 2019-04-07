@@ -180,7 +180,6 @@ let migrateBetween = (~version as _, ~lockedDeep as _, variable, fullName, thisT
           )->Belt.List.concat([(Nolabel, variable)]),
         ))
       };
-    // Some(variable)
   | _ => {
     print_endline("Bailed out migrating between " ++ String.concat("-", modulePath));
     print_endline(Vendor.Json.stringify(TypeMapSerde.dumpDecl(thisType)));

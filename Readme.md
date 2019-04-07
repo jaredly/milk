@@ -1,10 +1,30 @@
 
+# Milk 🥛 : Stress-free serialization & deserialization for Reason/OCaml
 
-Runtime options:
+## Stability: settling
+This is recently released, still settling down API n stuff, but I plan to maintain backwards compatability.
+Also I'm still working on documentation, so some things might be missing or unclear.
 
-- --override : replace the current version in the lockfile, even if incompatible
+```
+Usage: milk [config file] [options]
 
-# `types.json` format
+If no config file is provided, `types.json` will be used if it exists,
+otherwise the `milk` section of esy.json or package.json will be used if
+it exists.
+
+Options: (rarely used)
+
+- --override : Ignore current lockfile version, overriding conflicts.
+               NOTE: This should only be passed if you have not stored any
+               data using the currently generated serde, as it may now be
+               unparseable.
+- --upvert   : Convert a legacy config file (generated with a previous
+               version of milk) to the current schema.
+```
+
+## Configuration
+
+This goes either in a separate JSON file (e.g. `types.json`), or in a `"milk"` section of your `esy.json` or `package.json`.
 
 #### Example `types.json`:
 
@@ -32,71 +52,85 @@ Runtime options:
 
 #### Full spec:
 
-```
-{
-  "version": 1, // the current version of your types. Must be monotonically increasing integer
-  // optional if there's only one engine (the types get inlined into the engine output file)
-  "typesOutput": "./path/to/typesoutput.re",
-  "engines": {
-    "rex-json": {
-      "output": "./path/to/outfile.re",
-    },
-    "bs.json": {
-      "output": "./path/to/outfile_bs.re",
-    }
-  },
-  "entries": [
-    {
-      "file": "path/to/source.re",
-      "type": "typename", // or "Submodule.typename"
-      // optional if "typename" is not in a submodule.
-      "publicName": "someOtherName",
-      // optional. defaults to the `global-engines` value
-      "engines": ["rex-json"],
-      // defaults to true. set to false to not create historical deserializers for this type.
-      "history": true,
-      // optional. defaults to the global minVersion
-      "minVersion": 1,
-    }
-  ],
-  // optional
-  "minVersion": 1, // the minimum version to create deserializers & migrators for.
-  // optional, defaults to "all of the engines". Use this to exclude an engine from most of the entries.
-  "globalEngines": ["rex-json"],
-}
-```
+- `version: int` : this is the version of your types. When you serialize anything, it will have this version attached to it, so that the data can be deserialized in the future & migrated through any subsequent versions. When you make a "breaking change" (see below for details), you'll need to increment this version number, and provide any necessary migrator functions (see below for migration details).
+- `lockedTypes: string` : If you have multiple engines defined, then this is required, otherwise it's optional. This file is where all of the types for all of the versions that exist in your lockfile will be generated, for use by deserialization and migration functions.
+- `engines: {[key: engine_name]: engineConfig}` : a mapping of `engine_name` to `engineConfig`, where `engine_name` is one of `rex_json`, `bs_json`, `ezjsonm`, and `yojson`.
+  - `engineConfig: {output: string, helpers: option(string)}`. Output is the file where the serializer & deserializer functions should be output to, and `helpers` is the name of the module that contains any necessary `TransformHelpers` (see below)
+- `entries: list(entry)` : the list of your "entry point" types. These are the types that you want to be able to serialize & deserialize.
+    - `file: string` the source file where this type is defined
+    - `type: string` the name of the type within the file, including containing submodules. e.g. `someType` if it's at the top level, or `SomeModule.InnerModule.t` if it's nested.
+    - `publicName: string` the name that will be used in the externally usable serialization & deserialization functions. e.g. if your type name is `t`, having a function called `deserializeT` won't be super helpful, so you can put `publicName: "animal"` and you'll get `deserializeAnimal`
+- `custom: list(custom)`. "Custom" types are types for which you want to be treated as opaque -- milk will not generate ser/de functions for them, and you will provide those in the `helpers` module(s).
+  - `module: string` the module name the contains the type you want to override. e.g. `Animals`
+  - `path: list(string)` the path within the module, if there's nesting. If the type is `Animals.Dogs.t`, this would be `["Dogs"]`
+  - `name: string` the name of the type to override. e.g. `t`
+  - `args: int` the number of type arguments that the type has.
 
 # How does it work?
 
-Type-digger has two phases. 1) generate/update lockfile. 2) generate serialization, migration, and deserialization code for all known types & versions.
+Milk has two phases. 1) generate/update lockfile. 2) generate serialization, migration, and deserialization code for all known types & versions.
 
 ## Generate/update lockfile
 
 A lockfile consists of an array of "locked type maps", each corresponding to a "version" of your types.
 A "locked type map" is a map from a "module path" (like `MyModule.SubModule.typename`) to a serialization of the type declaration, including any `@attributes`.
 
-Type-digger first creates a "locked type map" for the current state of your types, starting with your "entry types", and recursively following any type references down to their definitions.
-Then, if there's a current lockfile & the version in `types.json` has not been incremented, it checks for incompatible changes & errors out in that case. If the changes are compatible (see below), it overwrites the locked type map, and if the version number has been incremented since the last type Type-digger was run, it appends the type map to the array.
+Milk first creates a "locked type map" for the current state of your types, starting with your "entry types", and recursively following any type references down to their definitions.
+Then, if there's a current lockfile & the version in `types.json` has not been incremented, it checks for incompatible changes & errors out in that case. If the changes are compatible (see below), it overwrites the locked type map, and if the version number has been incremented since the last type Milk was run, it appends the type map to the array.
 The whole array is then written out to the lockfile.
 
 ## Generate code!
 
+First, the "locked types" are generated. For each version, a `TypesN` module is created that contains the type definition for every type needed to fully define all of the entry types for that version. The final (current) version also aliases those type definitions to the definitions used in the rest of your app. Also, migration functions are auto-generated (if possible), or referenced (if defined as decorators, see below). If a migration function cannot be auto-generated, and has not been provided, Milk errors out with a message indicating the migration function that's missing.
 
+With the "locked types" modules, Milk is able to create type-safe deserializers for all previous versions of your types, after you have made changes to the types used in the rest of your app.
 
+Next, deserialization functions are created (recursively) for all versions in the lockfile.
 
+Then, serialization functions are created for the latest version.
 
+Finally, "entry point" `serializeThing` and `deserializeThing` functions are created, with the deserialize function checking the schema version of the data passed in, and performing any necessary migrations to get it up to the current version of the type.
 
+## Migrations!
 
-# Engine versioning
+When you make a backwards-incompatible change (see below) to a type, you must provide functions to migrate from the previous version to the current version, in the form of `[@` decorators.
 
-In order for an engine to be able to modify the serialization representation, lockfiles also include the versions of the engines used.
+For a "whole type" migration, provide a function as a `[@migrate ]` decorator that takes data of the old type and returns data of the new type.
 
+```re
+// previous type definition
+type person = {name: string, age: int};
+// new type, with decorator
+[@migrate ({name, age}) => {name, age: float_of_int(age), favoriteColor: None}]
+type person = {name: string, age: float, favoriteColor: option(string)};
+```
 
+### Records
 
-When you run type-digger, it
-- takes a snapshot of the currently defined types
-- compares to the lockfile if it exists
-  - if the lockfile's version is the same as the types.json version, and the current types are incompatible with the lockfiles types, then error out (the version in types.json must be incremented)
+You can also provide migrator functions on an attribute basis, which is especially helpful if the type is large.
+```re
+// previous type definition
+type person = {name: string, age: int};
+// new type, with decorator
+[@migrate.age person => float_of_int(person.age)]
+[@migrate.favoriteColor (_) => None]
+type person = {name: string, age: float, favoriteColor: option(string)};
+```
+
+Note that the per-attribute migration function takes the whole previous record as the argument, so that you can provide migrators for newly added attributes as well.
+
+### Variants
+
+If you remove a constructor from a variant, or modify a constuctor, you can provide a per-constructor migrator. The "function" that you're passing in actually gets dissected and turned into a case of a `switch` block, so keep that in mind (which is why I'm deconstructing the individual case in the function argument, which would usually cause problems).
+
+```re
+// previous type definition
+type animal = Dog(string) | Cat | Mouse;
+// new type definition
+[@migrate.Dog (Dog(breed)) => Dog(breed, None)]
+[@migrate.Mouse (Mouse) => Cat] // yeah this doesn't make sense as a migration to me either
+type animal = Dog(string, option(int)) | Cat;
+```
 
 ## What type changes are "compatible"
 (e.g. don't require a version bump)
@@ -107,77 +141,3 @@ When you run type-digger, it
 - *adding* an optional attribute for a record (will default to None)
 - *removing* an attribute from a record
 
-# How upgrading and configuration and compatability works.
-
-Goal: A version of type-digger can produce compatible serde for any previous version.
-Goal: A version of domain serde can *deserialize* data from any of its previous versions. (from entries that are marked as caring about history)
-
-
-Example:
-
-Say we have a types.lock.json with the following:
-
-- v1 "rex-json-1" with domain types version D1
-- v2 "rex-json-2" with domain types version D1
-- v3 "rex-json-2" with domain types version D2
-- v4 "rex-json-2" with domain types version D3
-
-We need to produce a
-- "serializeDog" only for the current types
-- "deserializeDog" that can handle
-  - D3 (easy)
-  - D2
-  - D1 @ rex-json-2
-  - D1 @ rex-json-1
-
-Structure of the output file might be something like:
-
-
-```
-
-module V3 (and V2 and V1) = {
-  module LockedTypes = {
-    ... locked types, not connected to currents
-    ... welll actually I want the ones that haven't changed to be connected to the currents
-  }
-  ... deserializers
-  ... migrators
-}
-
-module V4 = {
-  module LockedTypes = {
-    ... locked current types
-  };
-  ... serializers
-  ... deserializers
-  ... migrators
-}
-
-let serializeDog = dog => {
-  wrapWithVersion(
-    version,
-    V4.serializeDog(dog)
-  )
-};
-
-let deserializeDog = json => {
-  let%Try (version, payload) = parseVersion(json);
-  switch version {
-    | 4 => V4.deserializeDog(payload)
-    | 3 => V3.deserializeDog(payload)->V4.migrateDog
-    | 2 => V2.deserializeDog(payload)->V3.migrateDog->V4.migrateDog
-    | 1 => V1.deserializeDog(payload)
-              ->V2.migrateDog->V3.migrateDog->V4.migrateDog
-    | _ => Error("Unrecognized version")
-  }
-};
-
-```
-
-
-
-So if V4.dog === V1.dog, then I want them to be aliased to each other.
-And if V3.cat === V4.cat, and V2.cat === V1.cat, I want those aliased.
-So that the migrate functions are free.
-
-Ummmm so maybe I'll produce a hash of the deep type? That sounds reasonable.
