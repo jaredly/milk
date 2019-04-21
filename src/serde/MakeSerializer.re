@@ -68,6 +68,29 @@ let serializeVariant = (constructors, serializeExpr, makeVariant) => {
   );
 };
 
+let serializeRowVariant = (rows, serializeExpr, makeRowVariant) => {
+  rows->Belt.List.map(((name, arg)) =>
+    Exp.case(
+      Pat.variant(
+        name,
+        switch (arg) {
+        | None => None
+        | Some(arg) => Some([%pat? arg])
+        },
+      ),
+      makeRowVariant(
+        name,
+        switch (arg) {
+        | None => []
+        | Some(arg) => [
+            serializeExpr(~input=[%expr arg], arg),
+          ]
+        },
+      ),
+    )
+  );
+};
+
 // let serializeExpr
 
 /*
@@ -184,39 +207,15 @@ let rec forExpr = (~input, ~renames, transformer, t) => switch t {
       Pat.tuple(pats)
     )
   | RowVariant(rows, _closed) =>
-  let cases = 
-        rows->Belt.List.map(((name, arg)) => {
-          Exp.case(
-            Pat.variant(
-              name,
-              switch arg {
-                | None => None
-                | Some(arg) => Some([%pat? arg])
-              }
-            ),
-            transformer.constructor(
-              ~renames, name,
-              switch arg {
-                | None => []
-                | Some(arg) =>
-                  [forExpr(~input=Some([%expr arg]), ~renames, transformer, arg)]
-              }
-            )
-          )
-        });
+    let cases = serializeRowVariant(
+      rows,
+      (~input, expr) => forExpr(~input=Some(input), ~renames, transformer, expr),
+      transformer.constructor(~renames)
+    );
     switch input {
       | None => [%expr constructor => [%e Exp.match([%expr constructor], cases)]]
       | Some(input) => Exp.match(input, cases)
     }
-    // Exp.fun_(
-    //   Nolabel,
-    //   None,
-    //   Pat.var(Location.mknoloc("constructor")),
-    //   Exp.match(
-    //     makeIdent(Lident("constructor")),
-    //     cases
-    //   )
-    // )
   | _ => failer("not impl expr")
 };
 
