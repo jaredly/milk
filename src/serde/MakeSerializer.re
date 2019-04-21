@@ -124,7 +124,7 @@ let variableTransformerName = name => name ++ "Transformer";
 
 type transformer('source) = {
   wrapWithVersion: Parsetree.expression,
-  source: ('source) => Parsetree.expression,
+  source: (~source: 'source, ~transformers: list(Parsetree.expression), ~input: option(Parsetree.expression)) => Parsetree.expression,
   list: (Parsetree.expression) => Parsetree.expression,
   tuple: (list(Parsetree.expression)) => Parsetree.expression,
   record: (~renames: list((string, string)), list((string, Parsetree.expression))) => Parsetree.expression,
@@ -158,6 +158,13 @@ let fnOrLet = (body, input, pattern) => switch input {
   }]
 };
 
+let withMaybeVariable = (input, fn) => {
+  switch input {
+    | None => [%expr value => [%e fn([%expr value])]]
+    | Some(input) => fn(input)
+  }
+};
+
 let rec forExpr = (~input, ~renames, transformer, t) => switch t {
   | Variable(string) =>
     let fn = makeIdent(Lident(variableTransformerName(string)));
@@ -166,25 +173,15 @@ let rec forExpr = (~input, ~renames, transformer, t) => switch t {
   | Reference(source, args) =>
     switch (source, args) {
       | (DigTypes.Builtin("list"), [arg]) =>
-        let name = switch input {
-          | Some(i) => i
-          | None => [%expr list]
-        };
-        let body = transformer.list(
-          [%expr Belt.List.map([%e name], [%e forExpr(~input=None, ~renames, transformer, arg)])]
-        );
-        switch input {
-          | Some(i) => body
-          | None => [%expr list => [%e body]]
-        }
+        withMaybeVariable(input, value => transformer.list(
+          [%expr Belt.List.map([%e value], [%e forExpr(~input=None, ~renames, transformer, arg)])]
+        ));
       | _ =>
-        maybeCall(switch args {
-          | [] => transformer.source(source)
-          | args => Exp.apply(
-            transformer.source(source),
-            args->Belt.List.map(arg => (Nolabel, forExpr(~input=None, ~renames, transformer, arg)))
-          )
-        }, input)
+        transformer.source(
+          ~source,
+          ~transformers=args->Belt.List.map(arg => forExpr(~input=None, ~renames, transformer, arg)),
+          ~input
+        );
     }
   | Tuple(items) =>
     let rec loop = (i, items) => switch items {
@@ -238,7 +235,7 @@ let forBody = (~helpers, ~renames, transformer, body, fullName, variables) => sw
       ))
     }
   | Expr(e) =>
-    forExpr(~input=Some([%expr value]), ~renames, transformer, e)
+    [%expr value => [%e forExpr(~input=Some([%expr value]), ~renames, transformer, e)]]
   | Record(items) =>
     [%expr record => [%e transformer.record(~renames, serializeRecord(
       ~valueName="record",

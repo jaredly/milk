@@ -1,11 +1,17 @@
 [@ocaml.warning "-34"];
 open KitchenTypes;
-type target = Ezjsonm.value;
+type target = [
+  | `Null
+  | `Bool(bool)
+  | `Float(float)
+  | `String(string)
+  | `A(list(target))
+  | `O(list((string, target)))
+];
 module Version1 = {
   open Types1;
   let rec deserialize_AllTypes__All__normalRecord:
-    Ezjsonm.value =>
-    Belt.Result.t(_AllTypes__All__normalRecord, list(string)) =
+    target => Belt.Result.t(_AllTypes__All__normalRecord, list(string)) =
     record =>
       switch (record) {
       | `O(items) =>
@@ -275,8 +281,7 @@ module Version1 = {
       | _ => Belt.Result.Error(["Expected an object"])
       }
   and deserialize_AllTypes__All__normalVariant:
-    Ezjsonm.value =>
-    Belt.Result.t(_AllTypes__All__normalVariant, list(string)) =
+    target => Belt.Result.t(_AllTypes__All__normalVariant, list(string)) =
     constructor =>
       switch (constructor) {
       | `A([`String(tag)])
@@ -320,9 +325,9 @@ module Version1 = {
   and deserialize_AllTypes__All__parameterizedRecord:
     'arg0 'arg1.
     (
-      Ezjsonm.value => Belt.Result.t('arg0, list(string)),
-      Ezjsonm.value => Belt.Result.t('arg1, list(string)),
-      Ezjsonm.value
+      target => Belt.Result.t('arg0, list(string)),
+      target => Belt.Result.t('arg1, list(string)),
+      target
     ) =>
     Belt.Result.t(
       _AllTypes__All__parameterizedRecord('arg0, 'arg1),
@@ -428,9 +433,9 @@ module Version1 = {
         | _ => Belt.Result.Error(["Expected an object"])
         }:
         (
-          Ezjsonm.value => Belt.Result.t(arg0, list(string)),
-          Ezjsonm.value => Belt.Result.t(arg1, list(string)),
-          Ezjsonm.value
+          target => Belt.Result.t(arg0, list(string)),
+          target => Belt.Result.t(arg1, list(string)),
+          target
         ) =>
         Belt.Result.t(
           _AllTypes__All__parameterizedRecord(arg0, arg1),
@@ -440,9 +445,9 @@ module Version1 = {
   and deserialize_AllTypes__All__parameterizedVariant:
     'arg0 'arg1.
     (
-      Ezjsonm.value => Belt.Result.t('arg0, list(string)),
-      Ezjsonm.value => Belt.Result.t('arg1, list(string)),
-      Ezjsonm.value
+      target => Belt.Result.t('arg0, list(string)),
+      target => Belt.Result.t('arg1, list(string)),
+      target
     ) =>
     Belt.Result.t(
       _AllTypes__All__parameterizedVariant('arg0, 'arg1),
@@ -541,9 +546,9 @@ module Version1 = {
         | _ => Belt.Result.Error(["Expected an array"])
         }:
         (
-          Ezjsonm.value => Belt.Result.t(arg0, list(string)),
-          Ezjsonm.value => Belt.Result.t(arg1, list(string)),
-          Ezjsonm.value
+          target => Belt.Result.t(arg0, list(string)),
+          target => Belt.Result.t(arg1, list(string)),
+          target
         ) =>
         Belt.Result.t(
           _AllTypes__All__parameterizedVariant(arg0, arg1),
@@ -551,7 +556,7 @@ module Version1 = {
         )
     )
   and deserialize_AllTypes__All__recursive:
-    Ezjsonm.value => Belt.Result.t(_AllTypes__All__recursive, list(string)) =
+    target => Belt.Result.t(_AllTypes__All__recursive, list(string)) =
     constructor =>
       switch (constructor) {
       | `A([`String(tag)])
@@ -571,10 +576,10 @@ module Version1 = {
       | _ => Belt.Result.Error(["Expected an array"])
       }
   and deserialize_AllTypes__All__rename:
-    Ezjsonm.value => Belt.Result.t(_AllTypes__All__rename, list(string)) =
+    target => Belt.Result.t(_AllTypes__All__rename, list(string)) =
     value => deserialize_AllTypes__All__top(value)
   and deserialize_AllTypes__All__top:
-    Ezjsonm.value => Belt.Result.t(_AllTypes__All__top, list(string)) =
+    target => Belt.Result.t(_AllTypes__All__top, list(string)) =
     record =>
       switch (record) {
       | `O(items) =>
@@ -658,27 +663,23 @@ module Version1 = {
       | _ => Belt.Result.Error(["Expected an object"])
       }
   and serialize_AllTypes__All__normalRecord:
-    _AllTypes__All__normalRecord => Ezjsonm.value =
+    _AllTypes__All__normalRecord => target =
     record =>
       `O([
         ("a", (i => `Float(float_of_int(i)))(record.a)),
         ("b", (s => `String(s))(record.b)),
         (
           "c",
-          (
-            ((arg0, arg1)) =>
-              `A([
-                (i => `Float(float_of_int(i)))(arg0),
-                (
-                  ((arg0, arg1)) =>
-                    `A([(s => `String(s))(arg0), (f => `Float(f))(arg1)])
-                )(
-                  arg1,
-                ),
-              ])
-          )(
-            record.c,
-          ),
+          {
+            let (arg0, arg1) = record.c;
+            `A([
+              (i => `Float(float_of_int(i)))(arg0),
+              {
+                let (arg0, arg1) = arg1;
+                `A([(s => `String(s))(arg0), (f => `Float(f))(arg1)]);
+              },
+            ]);
+          },
         ),
         (
           "d",
@@ -694,7 +695,7 @@ module Version1 = {
             record.d,
           ),
         ),
-        ("e", (list => `A(Belt.List.map(list, f => `Float(f))))(record.e)),
+        ("e", `A(Belt.List.map(record.e, f => `Float(f)))),
         (
           "f",
           (
@@ -713,7 +714,7 @@ module Version1 = {
         ),
       ])
   and serialize_AllTypes__All__normalVariant:
-    _AllTypes__All__normalVariant => Ezjsonm.value =
+    _AllTypes__All__normalVariant => target =
     constructor =>
       switch (constructor) {
       | A => `A([`String("A")])
@@ -726,11 +727,11 @@ module Version1 = {
   and serialize_AllTypes__All__parameterizedRecord:
     'arg0 'arg1.
     (
-      'arg0 => Ezjsonm.value,
-      'arg1 => Ezjsonm.value,
+      'arg0 => target,
+      'arg1 => target,
       _AllTypes__All__parameterizedRecord('arg0, 'arg1)
     ) =>
-    Ezjsonm.value
+    target
    =
     (aTransformer, bTransformer, record) =>
       `O([
@@ -738,26 +739,24 @@ module Version1 = {
         ("b", bTransformer(record.b)),
         (
           "c",
-          (
-            ((arg0, arg1)) =>
-              `A([
-                (i => `Float(float_of_int(i)))(arg0),
-                (f => `Float(f))(arg1),
-              ])
-          )(
-            record.c,
-          ),
+          {
+            let (arg0, arg1) = record.c;
+            `A([
+              (i => `Float(float_of_int(i)))(arg0),
+              (f => `Float(f))(arg1),
+            ]);
+          },
         ),
         ("d", serialize_AllTypes__All__recursive(record.d)),
       ])
   and serialize_AllTypes__All__parameterizedVariant:
     'arg0 'arg1.
     (
-      'arg0 => Ezjsonm.value,
-      'arg1 => Ezjsonm.value,
+      'arg0 => target,
+      'arg1 => target,
       _AllTypes__All__parameterizedVariant('arg0, 'arg1)
     ) =>
-    Ezjsonm.value
+    target
    =
     (aTransformer, bTransformer, constructor) =>
       switch (constructor) {
@@ -782,17 +781,16 @@ module Version1 = {
       | PF(arg0) =>
         `A([`String("PF"), serialize_AllTypes__All__normalRecord(arg0)])
       }
-  and serialize_AllTypes__All__recursive:
-    _AllTypes__All__recursive => Ezjsonm.value =
+  and serialize_AllTypes__All__recursive: _AllTypes__All__recursive => target =
     constructor =>
       switch (constructor) {
       | A => `A([`String("A")])
       | B(arg0) =>
         `A([`String("B"), serialize_AllTypes__All__recursive(arg0)])
       }
-  and serialize_AllTypes__All__rename: _AllTypes__All__rename => Ezjsonm.value =
+  and serialize_AllTypes__All__rename: _AllTypes__All__rename => target =
     value => serialize_AllTypes__All__top(value)
-  and serialize_AllTypes__All__top: _AllTypes__All__top => Ezjsonm.value =
+  and serialize_AllTypes__All__top: _AllTypes__All__top => target =
     record =>
       `O([
         (

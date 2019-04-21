@@ -4,7 +4,7 @@ type target = Json.t;
 module Version1 = {
   open Types1;
   let rec deserialize_AllTypes__All__normalRecord:
-    Json.t => Belt.Result.t(_AllTypes__All__normalRecord, list(string)) =
+    target => Belt.Result.t(_AllTypes__All__normalRecord, list(string)) =
     record =>
       switch (record) {
       | Json.Object(items) =>
@@ -276,7 +276,7 @@ module Version1 = {
       | _ => Belt.Result.Error(["Expected an object"])
       }
   and deserialize_AllTypes__All__normalVariant:
-    Json.t => Belt.Result.t(_AllTypes__All__normalVariant, list(string)) =
+    target => Belt.Result.t(_AllTypes__All__normalVariant, list(string)) =
     constructor =>
       switch (constructor) {
       | Json.Array([Json.String(tag)])
@@ -320,9 +320,9 @@ module Version1 = {
   and deserialize_AllTypes__All__parameterizedRecord:
     'arg0 'arg1.
     (
-      Json.t => Belt.Result.t('arg0, list(string)),
-      Json.t => Belt.Result.t('arg1, list(string)),
-      Json.t
+      target => Belt.Result.t('arg0, list(string)),
+      target => Belt.Result.t('arg1, list(string)),
+      target
     ) =>
     Belt.Result.t(
       _AllTypes__All__parameterizedRecord('arg0, 'arg1),
@@ -428,9 +428,9 @@ module Version1 = {
         | _ => Belt.Result.Error(["Expected an object"])
         }:
         (
-          Json.t => Belt.Result.t(arg0, list(string)),
-          Json.t => Belt.Result.t(arg1, list(string)),
-          Json.t
+          target => Belt.Result.t(arg0, list(string)),
+          target => Belt.Result.t(arg1, list(string)),
+          target
         ) =>
         Belt.Result.t(
           _AllTypes__All__parameterizedRecord(arg0, arg1),
@@ -440,9 +440,9 @@ module Version1 = {
   and deserialize_AllTypes__All__parameterizedVariant:
     'arg0 'arg1.
     (
-      Json.t => Belt.Result.t('arg0, list(string)),
-      Json.t => Belt.Result.t('arg1, list(string)),
-      Json.t
+      target => Belt.Result.t('arg0, list(string)),
+      target => Belt.Result.t('arg1, list(string)),
+      target
     ) =>
     Belt.Result.t(
       _AllTypes__All__parameterizedVariant('arg0, 'arg1),
@@ -541,9 +541,9 @@ module Version1 = {
         | _ => Belt.Result.Error(["Expected an array"])
         }:
         (
-          Json.t => Belt.Result.t(arg0, list(string)),
-          Json.t => Belt.Result.t(arg1, list(string)),
-          Json.t
+          target => Belt.Result.t(arg0, list(string)),
+          target => Belt.Result.t(arg1, list(string)),
+          target
         ) =>
         Belt.Result.t(
           _AllTypes__All__parameterizedVariant(arg0, arg1),
@@ -551,7 +551,7 @@ module Version1 = {
         )
     )
   and deserialize_AllTypes__All__recursive:
-    Json.t => Belt.Result.t(_AllTypes__All__recursive, list(string)) =
+    target => Belt.Result.t(_AllTypes__All__recursive, list(string)) =
     constructor =>
       switch (constructor) {
       | Json.Array([Json.String(tag)])
@@ -571,10 +571,10 @@ module Version1 = {
       | _ => Belt.Result.Error(["Expected an array"])
       }
   and deserialize_AllTypes__All__rename:
-    Json.t => Belt.Result.t(_AllTypes__All__rename, list(string)) =
+    target => Belt.Result.t(_AllTypes__All__rename, list(string)) =
     value => deserialize_AllTypes__All__top(value)
   and deserialize_AllTypes__All__top:
-    Json.t => Belt.Result.t(_AllTypes__All__top, list(string)) =
+    target => Belt.Result.t(_AllTypes__All__top, list(string)) =
     record =>
       switch (record) {
       | Json.Object(items) =>
@@ -659,81 +659,54 @@ module Version1 = {
       | _ => Belt.Result.Error(["Expected an object"])
       }
   and serialize_AllTypes__All__normalRecord:
-    _AllTypes__All__normalRecord => Json.t =
+    _AllTypes__All__normalRecord => target =
     record =>
       Json.Object([
-        ("a", (i => Json.Number(float_of_int(i)))(record.a)),
-        ("b", (s => Json.String(s))(record.b)),
+        ("a", Json.Number(float_of_int(record.a))),
+        ("b", Json.String(record.b)),
         (
           "c",
-          (
-            ((arg0, arg1)) =>
-              Json.Array([
-                (i => Json.Number(float_of_int(i)))(arg0),
-                (
-                  ((arg0, arg1)) =>
-                    Json.Array([
-                      (s => Json.String(s))(arg0),
-                      (f => Json.Number(f))(arg1),
-                    ])
-                )(
-                  arg1,
-                ),
-              ])
-          )(
-            record.c,
-          ),
+          {
+            let (arg0, arg1) = record.c;
+            Json.Array([
+              Json.Number(float_of_int(arg0)),
+              {
+                let (arg0, arg1) = arg1;
+                Json.Array([Json.String(arg0), Json.Number(arg1)]);
+              },
+            ]);
+          },
         ),
         (
           "d",
-          (
-            (
-              (transformer, array) =>
-                Json.Array(
-                  Belt.List.fromArray(Belt.Array.map(array, transformer)),
-                )
-            )(
-              i =>
-              Json.Number(float_of_int(i))
-            )
-          )(
-            record.d,
+          Json.Array(
+            Belt.List.fromArray(
+              Belt.Array.map(record.d, value =>
+                Json.Number(float_of_int(value))
+              ),
+            ),
           ),
         ),
         (
           "e",
-          (list => Json.Array(Belt.List.map(list, f => Json.Number(f))))(
-            record.e,
-          ),
+          Json.Array(Belt.List.map(record.e, value => Json.Number(value))),
         ),
         (
           "f",
-          (
-            (
-              transformer =>
-                fun
-                | None => Json.Null
-                | Some(v) => transformer(v)
-            )(
-              i =>
-              Json.Number(float_of_int(i))
-            )
-          )(
-            record.f,
-          ),
+          switch (record.f) {
+          | None => Json.Null
+          | Some(v) => (value => Json.Number(float_of_int(value)))(v)
+          },
         ),
       ])
   and serialize_AllTypes__All__normalVariant:
-    _AllTypes__All__normalVariant => Json.t =
+    _AllTypes__All__normalVariant => target =
     constructor =>
       switch (constructor) {
       | A => Json.Array([Json.String("A")])
       | B => Json.Array([Json.String("B")])
       | C(arg0) =>
-        Json.Array([
-          Json.String("C"),
-          (i => Json.Number(float_of_int(i)))(arg0),
-        ])
+        Json.Array([Json.String("C"), Json.Number(float_of_int(arg0))])
       | D(arg0) =>
         Json.Array([
           Json.String("D"),
@@ -743,11 +716,11 @@ module Version1 = {
   and serialize_AllTypes__All__parameterizedRecord:
     'arg0 'arg1.
     (
-      'arg0 => Json.t,
-      'arg1 => Json.t,
+      'arg0 => target,
+      'arg1 => target,
       _AllTypes__All__parameterizedRecord('arg0, 'arg1)
     ) =>
-    Json.t
+    target
    =
     (aTransformer, bTransformer, record) =>
       Json.Object([
@@ -755,26 +728,24 @@ module Version1 = {
         ("b", bTransformer(record.b)),
         (
           "c",
-          (
-            ((arg0, arg1)) =>
-              Json.Array([
-                (i => Json.Number(float_of_int(i)))(arg0),
-                (f => Json.Number(f))(arg1),
-              ])
-          )(
-            record.c,
-          ),
+          {
+            let (arg0, arg1) = record.c;
+            Json.Array([
+              Json.Number(float_of_int(arg0)),
+              Json.Number(arg1),
+            ]);
+          },
         ),
         ("d", serialize_AllTypes__All__recursive(record.d)),
       ])
   and serialize_AllTypes__All__parameterizedVariant:
     'arg0 'arg1.
     (
-      'arg0 => Json.t,
-      'arg1 => Json.t,
+      'arg0 => target,
+      'arg1 => target,
       _AllTypes__All__parameterizedVariant('arg0, 'arg1)
     ) =>
-    Json.t
+    target
    =
     (aTransformer, bTransformer, constructor) =>
       switch (constructor) {
@@ -789,12 +760,9 @@ module Version1 = {
       | PD(arg0) =>
         Json.Array([
           Json.String("PD"),
-          (
-            serialize_AllTypes__All__parameterizedRecord(
-              aTransformer,
-              bTransformer,
-            )
-          )(
+          serialize_AllTypes__All__parameterizedRecord(
+            aTransformer,
+            bTransformer,
             arg0,
           ),
         ])
@@ -809,7 +777,7 @@ module Version1 = {
           serialize_AllTypes__All__normalRecord(arg0),
         ])
       }
-  and serialize_AllTypes__All__recursive: _AllTypes__All__recursive => Json.t =
+  and serialize_AllTypes__All__recursive: _AllTypes__All__recursive => target =
     constructor =>
       switch (constructor) {
       | A => Json.Array([Json.String("A")])
@@ -819,31 +787,25 @@ module Version1 = {
           serialize_AllTypes__All__recursive(arg0),
         ])
       }
-  and serialize_AllTypes__All__rename: _AllTypes__All__rename => Json.t =
+  and serialize_AllTypes__All__rename: _AllTypes__All__rename => target =
     value => serialize_AllTypes__All__top(value)
-  and serialize_AllTypes__All__top: _AllTypes__All__top => Json.t =
+  and serialize_AllTypes__All__top: _AllTypes__All__top => target =
     record =>
       Json.Object([
         (
           "contents",
-          (
-            serialize_AllTypes__All__parameterizedVariant(
-              i => Json.Number(float_of_int(i)),
-              (
-                (transformer, array) =>
-                  Json.Array(
-                    Belt.List.fromArray(Belt.Array.map(array, transformer)),
-                  )
-              )(
-                f =>
-                Json.Number(f)
+          serialize_AllTypes__All__parameterizedVariant(
+            value => Json.Number(float_of_int(value)),
+            value =>
+              Json.Array(
+                Belt.List.fromArray(
+                  Belt.Array.map(value, value => Json.Number(value)),
+                ),
               ),
-            )
-          )(
             record.contents,
           ),
         ),
-        ("title", (s => Json.String(s))(record.title)),
+        ("title", Json.String(record.title)),
       ]);
 };
 module Current = Version1;

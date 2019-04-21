@@ -4,7 +4,7 @@ type target = Js.Json.t;
 module Version1 = {
   open Types1;
   let rec deserialize_AllTypes__All__normalRecord:
-    Js.Json.t => Belt.Result.t(_AllTypes__All__normalRecord, list(string)) =
+    target => Belt.Result.t(_AllTypes__All__normalRecord, list(string)) =
     record =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
@@ -280,7 +280,7 @@ module Version1 = {
       | _ => Belt.Result.Error(["Expected an object"])
       }
   and deserialize_AllTypes__All__normalVariant:
-    Js.Json.t => Belt.Result.t(_AllTypes__All__normalVariant, list(string)) =
+    target => Belt.Result.t(_AllTypes__All__normalVariant, list(string)) =
     constructor =>
       switch (Js.Json.classify(constructor)) {
       | JSONArray([|tag|])
@@ -324,9 +324,9 @@ module Version1 = {
   and deserialize_AllTypes__All__parameterizedRecord:
     'arg0 'arg1.
     (
-      Js.Json.t => Belt.Result.t('arg0, list(string)),
-      Js.Json.t => Belt.Result.t('arg1, list(string)),
-      Js.Json.t
+      target => Belt.Result.t('arg0, list(string)),
+      target => Belt.Result.t('arg1, list(string)),
+      target
     ) =>
     Belt.Result.t(
       _AllTypes__All__parameterizedRecord('arg0, 'arg1),
@@ -432,9 +432,9 @@ module Version1 = {
         | _ => Belt.Result.Error(["Expected an object"])
         }:
         (
-          Js.Json.t => Belt.Result.t(arg0, list(string)),
-          Js.Json.t => Belt.Result.t(arg1, list(string)),
-          Js.Json.t
+          target => Belt.Result.t(arg0, list(string)),
+          target => Belt.Result.t(arg1, list(string)),
+          target
         ) =>
         Belt.Result.t(
           _AllTypes__All__parameterizedRecord(arg0, arg1),
@@ -444,9 +444,9 @@ module Version1 = {
   and deserialize_AllTypes__All__parameterizedVariant:
     'arg0 'arg1.
     (
-      Js.Json.t => Belt.Result.t('arg0, list(string)),
-      Js.Json.t => Belt.Result.t('arg1, list(string)),
-      Js.Json.t
+      target => Belt.Result.t('arg0, list(string)),
+      target => Belt.Result.t('arg1, list(string)),
+      target
     ) =>
     Belt.Result.t(
       _AllTypes__All__parameterizedVariant('arg0, 'arg1),
@@ -548,9 +548,9 @@ module Version1 = {
         | _ => Belt.Result.Error(["Expected an array"])
         }:
         (
-          Js.Json.t => Belt.Result.t(arg0, list(string)),
-          Js.Json.t => Belt.Result.t(arg1, list(string)),
-          Js.Json.t
+          target => Belt.Result.t(arg0, list(string)),
+          target => Belt.Result.t(arg1, list(string)),
+          target
         ) =>
         Belt.Result.t(
           _AllTypes__All__parameterizedVariant(arg0, arg1),
@@ -558,7 +558,7 @@ module Version1 = {
         )
     )
   and deserialize_AllTypes__All__recursive:
-    Js.Json.t => Belt.Result.t(_AllTypes__All__recursive, list(string)) =
+    target => Belt.Result.t(_AllTypes__All__recursive, list(string)) =
     constructor =>
       switch (Js.Json.classify(constructor)) {
       | JSONArray([|tag|])
@@ -577,10 +577,10 @@ module Version1 = {
       | _ => Belt.Result.Error(["Expected an array"])
       }
   and deserialize_AllTypes__All__rename:
-    Js.Json.t => Belt.Result.t(_AllTypes__All__rename, list(string)) =
+    target => Belt.Result.t(_AllTypes__All__rename, list(string)) =
     value => deserialize_AllTypes__All__top(value)
   and deserialize_AllTypes__All__top:
-    Js.Json.t => Belt.Result.t(_AllTypes__All__top, list(string)) =
+    target => Belt.Result.t(_AllTypes__All__top, list(string)) =
     record =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
@@ -667,7 +667,7 @@ module Version1 = {
       | _ => Belt.Result.Error(["Expected an object"])
       }
   and serialize_AllTypes__All__normalRecord:
-    _AllTypes__All__normalRecord => Js.Json.t =
+    _AllTypes__All__normalRecord => target =
     record =>
       Js.Json.object_(
         Js.Dict.fromArray([|
@@ -675,23 +675,19 @@ module Version1 = {
           ("b", Js.Json.string(record.b)),
           (
             "c",
-            (
-              ((arg0, arg1)) =>
-                Js.Json.array([|
-                  (int => Js.Json.number(float_of_int(int)))(arg0),
-                  (
-                    ((arg0, arg1)) =>
-                      Js.Json.array([|
-                        Js.Json.string(arg0),
-                        Js.Json.number(arg1),
-                      |])
-                  )(
-                    arg1,
-                  ),
-                |])
-            )(
-              record.c,
-            ),
+            {
+              let (arg0, arg1) = record.c;
+              Js.Json.array([|
+                (int => Js.Json.number(float_of_int(int)))(arg0),
+                {
+                  let (arg0, arg1) = arg1;
+                  Js.Json.array([|
+                    Js.Json.string(arg0),
+                    Js.Json.number(arg1),
+                  |]);
+                },
+              |]);
+            },
           ),
           (
             "d",
@@ -709,13 +705,8 @@ module Version1 = {
           ),
           (
             "e",
-            (
-              list =>
-                Js.Json.array(
-                  Belt.List.toArray(Belt.List.map(list, Js.Json.number)),
-                )
-            )(
-              record.e,
+            Js.Json.array(
+              Belt.List.toArray(Belt.List.map(record.e, Js.Json.number)),
             ),
           ),
           (
@@ -737,7 +728,7 @@ module Version1 = {
         |]),
       )
   and serialize_AllTypes__All__normalVariant:
-    _AllTypes__All__normalVariant => Js.Json.t =
+    _AllTypes__All__normalVariant => target =
     constructor =>
       switch (constructor) {
       | A => Js.Json.array([|Js.Json.string("A")|])
@@ -756,11 +747,11 @@ module Version1 = {
   and serialize_AllTypes__All__parameterizedRecord:
     'arg0 'arg1.
     (
-      'arg0 => Js.Json.t,
-      'arg1 => Js.Json.t,
+      'arg0 => target,
+      'arg1 => target,
       _AllTypes__All__parameterizedRecord('arg0, 'arg1)
     ) =>
-    Js.Json.t
+    target
    =
     (aTransformer, bTransformer, record) =>
       Js.Json.object_(
@@ -769,15 +760,13 @@ module Version1 = {
           ("b", bTransformer(record.b)),
           (
             "c",
-            (
-              ((arg0, arg1)) =>
-                Js.Json.array([|
-                  (int => Js.Json.number(float_of_int(int)))(arg0),
-                  Js.Json.number(arg1),
-                |])
-            )(
-              record.c,
-            ),
+            {
+              let (arg0, arg1) = record.c;
+              Js.Json.array([|
+                (int => Js.Json.number(float_of_int(int)))(arg0),
+                Js.Json.number(arg1),
+              |]);
+            },
           ),
           ("d", serialize_AllTypes__All__recursive(record.d)),
         |]),
@@ -785,11 +774,11 @@ module Version1 = {
   and serialize_AllTypes__All__parameterizedVariant:
     'arg0 'arg1.
     (
-      'arg0 => Js.Json.t,
-      'arg1 => Js.Json.t,
+      'arg0 => target,
+      'arg1 => target,
       _AllTypes__All__parameterizedVariant('arg0, 'arg1)
     ) =>
-    Js.Json.t
+    target
    =
     (aTransformer, bTransformer, constructor) =>
       switch (constructor) {
@@ -825,8 +814,7 @@ module Version1 = {
           serialize_AllTypes__All__normalRecord(arg0),
         |])
       }
-  and serialize_AllTypes__All__recursive:
-    _AllTypes__All__recursive => Js.Json.t =
+  and serialize_AllTypes__All__recursive: _AllTypes__All__recursive => target =
     constructor =>
       switch (constructor) {
       | A => Js.Json.array([|Js.Json.string("A")|])
@@ -836,9 +824,9 @@ module Version1 = {
           serialize_AllTypes__All__recursive(arg0),
         |])
       }
-  and serialize_AllTypes__All__rename: _AllTypes__All__rename => Js.Json.t =
+  and serialize_AllTypes__All__rename: _AllTypes__All__rename => target =
     value => serialize_AllTypes__All__top(value)
-  and serialize_AllTypes__All__top: _AllTypes__All__top => Js.Json.t =
+  and serialize_AllTypes__All__top: _AllTypes__All__top => target =
     record =>
       Js.Json.object_(
         Js.Dict.fromArray([|

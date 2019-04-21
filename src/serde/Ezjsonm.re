@@ -19,7 +19,9 @@ let target = [%type:
   | `O(list((string, target))) ]
 ];
 
-let sourceTransformer = source => switch source {
+let sourceTransformer = (~source, ~transformers, ~input) => {
+  let body = switch source {
+// let sourceTransformer = source => switch source {
   | DigTypes.NotFound => MakeSerializer.failer("Not found")
   | Public((moduleName, modulePath, name)) =>
     makeIdent(Lident(MakeSerializer.transformerName(~moduleName, ~modulePath, ~name)))
@@ -38,6 +40,11 @@ let sourceTransformer = source => switch source {
     | None => `Null
     | Some(v) => transformer(v)]
   | Builtin(name) => failer("Builtin: " ++ name)
+};
+  switch transformers {
+    | [] => MakeSerializer.maybeCall(body, input)
+    | tr => MakeSerializer.maybeCall(Exp.apply(body, tr->Belt.List.map(expr => (Nolabel, expr))), input)
+  }
 };
 
 let serializeTransformer =

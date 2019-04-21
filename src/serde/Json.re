@@ -11,23 +11,61 @@ let makeJson = (kind, contents) => Exp.construct(Location.mknoloc(Ldot(Lident("J
 let jsonObject = items => makeJson("Object", Some(makeList(items)));
 let jsonArray = items => makeJson("Array", Some(items));
 
-let sourceTransformer = source => switch source {
-  | DigTypes.NotFound => MakeSerializer.failer("Not found")
+let sourceTransformer = (~source, ~transformers, ~input) => switch source {
+  | DigTypes.NotFound => MakeSerializer.failer("Source not found")
   | Public((moduleName, modulePath, name)) =>
-    makeIdent(Lident(MakeSerializer.transformerName(~moduleName, ~modulePath, ~name)))
+    let ident = makeIdent(Lident(MakeSerializer.transformerName(~moduleName, ~modulePath, ~name)))
+    switch transformers {
+      | [] => MakeSerializer.maybeCall(ident, input)
+      | _ => Exp.apply(ident, {
+        let args = transformers->Belt.List.map(expr => (Nolabel, expr));
+        switch input {
+          | None => args
+          | Some(input) => args @ [(Nolabel, input)]
+        }
+      })
+    }
   | Builtin("array") =>
-    [%expr (transformer, array) => Json.Array(
-      Belt.List.fromArray(Belt.Array.map(array, transformer))
-    )]
+    switch transformers {
+      | [tr] =>
+        MakeSerializer.withMaybeVariable(
+          input,
+          value => [%expr Json.Array(
+            Belt.List.fromArray(Belt.Array.map([%e value], [%e tr]))
+          )]
+        )
+      | _ => failwith("Array must have an argument transformer")
+    }
+    // [%expr (transformer, array) => Json.Array(
+    //   Belt.List.fromArray(Belt.Array.map(array, transformer))
+    // )]
   | Builtin("list") =>
-    [%expr (transformer, list) => Json.Array(Belt.List.map(list, transformer))]
-  | Builtin("string") => [%expr s => Json.String(s)]
-  | Builtin("bool") => [%expr b => b ? Json.True : Json.False]
-  | Builtin("int") => [%expr i => Json.Number(float_of_int(i))]
-  | Builtin("float") => [%expr f => Json.Number(f)]
-  | Builtin("option") =>  [%expr (transformer) => fun
-    | None => Json.Null
-    | Some(v) => transformer(v)]
+    switch transformers {
+      | [tr] =>
+        MakeSerializer.withMaybeVariable(
+          input,
+          value => [%expr
+            Json.Array(Belt.List.map([%e value], [%e tr]))
+          ]
+        )
+      | _ => failwith("List must have an argument transformer")
+    }
+    // [%expr (transformer, list) => Json.Array(Belt.List.map(list, transformer))]
+  | Builtin("string") => MakeSerializer.withMaybeVariable(input, value => [%expr Json.String([%e value])])
+  | Builtin("bool") => MakeSerializer.withMaybeVariable(input, value => [%expr [%e value] ? Json.True : Json.False])
+  | Builtin("int") => MakeSerializer.withMaybeVariable(input, value => [%expr Json.Number(float_of_int([%e value]))])
+  | Builtin("float") => MakeSerializer.withMaybeVariable(input, value => [%expr Json.Number([%e value])])
+  | Builtin("option") => 
+    switch transformers {
+      | [tr] => MakeSerializer.withMaybeVariable(input, value => [%expr switch [%e value] {
+        | None => Json.Null
+        | Some(v) => [%e tr](v)
+      }])
+      | _ => failwith("List must have an argument transformer")
+    }
+    // [%expr (transformer) => fun
+    // | None => Json.Null
+    // | Some(v) => transformer(v)]
   | Builtin(name) => failer("Builtin: " ++ name)
 };
 

@@ -18,7 +18,9 @@ let failer = message => {
 let jsonObject = items => [%expr Js.Json.object_(Js.Dict.fromArray([%e Exp.array(items)]))];
 let jsonArray = items => [%expr Js.Json.array(Belt.List.toArray([%e items]))];
 
-let sourceTransformer = source => switch source {
+let sourceTransformer = (~source, ~transformers, ~input) => {
+  let body = switch source {
+// let sourceTransformer = source => switch source {
   | DigTypes.NotFound => MakeSerializer.failer("Not found")
   | Public((moduleName, modulePath, name)) =>
     makeIdent(Lident(MakeSerializer.transformerName(~moduleName, ~modulePath, ~name)))
@@ -38,6 +40,12 @@ let sourceTransformer = source => switch source {
     ]
   | Builtin(name) => failer("Builtin: " ++ name)
 };
+  switch transformers {
+    | [] => MakeSerializer.maybeCall(body, input)
+    | tr => MakeSerializer.maybeCall(Exp.apply(body, tr->Belt.List.map(expr => (Nolabel, expr))), input)
+  }
+};
+
 
 let target = [%type: Js.Json.t];
 
