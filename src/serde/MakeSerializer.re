@@ -22,6 +22,81 @@ open SharedTypes.SimpleType;
 let makeIdent = lident => Exp.ident(Location.mknoloc(lident));
 let loc = Location.none;
 
+/**
+  Takes a list of attributes
+  returns a list of (attrname, ast to transform that attr)
+ */
+let serializeRecord = (~valueName, attributes, serializeExpr) => {
+  let loc = Location.none;
+  attributes->Belt.List.map(((label, expr)) => (
+    label,
+    serializeExpr(~input=Exp.field(makeIdent(Lident(valueName)), Location.mknoloc(Lident(label))), expr)
+  ))
+};
+
+/**
+  Returns an AST of a `switch` to transform the variant
+ */
+let serializeVariant = (constructors, serializeExpr, makeVariant) => {
+  constructors->Belt.List.map(((name, args, _result)) =>
+    Exp.case(
+      Pat.construct(
+        Location.mknoloc(Lident(name)),
+        switch (args) {
+        | [] => None
+        | [_] => Some(Pat.var(Location.mknoloc("arg0")))
+        | many =>
+          Some(
+            Pat.tuple(
+              many->Belt.List.mapWithIndex((index, _) =>
+                Pat.var(Location.mknoloc("arg" ++ string_of_int(index)))
+              ),
+            ),
+          )
+        },
+      ),
+      makeVariant(
+        name,
+        args->Belt.List.mapWithIndex((index, arg) =>
+          serializeExpr(
+            ~input=makeIdent(Lident("arg" ++ string_of_int(index))),
+            arg
+          ),
+        ),
+      ),
+    )
+  );
+};
+
+// let serializeExpr
+
+/*
+Soooo things we can have:
+
+A serializer takes (a type) and returns (a function that takes that type, along with any typ vbl transformers, and returns the thing in question)
+
+for a record type (with vbls) and 
+
+  type expr('source) =
+    | Variable(string)
+    | AnonVariable
+    | RowVariant(list((string, option(expr('source)))), bool)
+    | Reference('source, list(expr('source)))
+    | Tuple(list(expr('source)))
+    | Fn(list((option(string), expr('source))), expr('source))
+    | Other
+
+  type body('source) =
+    | Open
+    | Abstract
+    | Expr(expr('source))
+    | Record(list((string, expr('source))))
+    | Variant(list((string, list(expr('source)), option(expr('source)))))
+
+*/
+
+
+
 let variableTransformerName = name => name ++ "Transformer";
 
 type transformer('source) = {
@@ -33,10 +108,12 @@ type transformer('source) = {
   constructor: (~renames: list((string, string)), string, list(Parsetree.expression)) => Parsetree.expression,
 };
 
-let failer = message => Exp.fun_(Nolabel, None, Pat.any(),
-Exp.apply(Exp.ident(Location.mknoloc(Lident("print_endline"))), [
-  (Nolabel, Exp.constant(Pconst_string(message, None)))
-]));
+// let failer = message => Exp.fun_(Nolabel, None, Pat.any(),
+// Exp.apply(Exp.ident(Location.mknoloc(Lident("print_endline"))), [
+//   (Nolabel, Exp.constant(Pconst_string(message, None)))
+// ]));
+
+let failer = message => failwith("Unserializable: " ++ message);
 
 let rec makeList = items => switch items {
   | [] => Exp.construct(Location.mknoloc(Lident("[]")), None)
@@ -45,24 +122,46 @@ let rec makeList = items => switch items {
   ])))
 }
 
-let rec forExpr = (~renames, transformer, t) => switch t {
-  | Variable(string) => makeIdent(Lident(variableTransformerName(string)))
+let call = (fn, vbl) => [%expr [%e fn]([%e vbl])];
+let maybeCall = (fn, input) => switch input {
+  | None => fn
+  | Some(input) => call(fn, input)
+};
+let fnOrLet = (body, input, pattern) => switch input {
+  | None => Exp.fun_(Nolabel, None, pattern, body)
+  | Some(input) => [%expr {
+    let [%p pattern] = [%e input];
+    [%e body]
+  }]
+};
+
+let rec forExpr = (~input, ~renames, transformer, t) => switch t {
+  | Variable(string) =>
+    let fn = makeIdent(Lident(variableTransformerName(string)));
+    maybeCall(fn, input)
   | AnonVariable => failer("Anon variable")
   | Reference(source, args) =>
     switch (source, args) {
       | (DigTypes.Builtin("list"), [arg]) =>
-        [%expr list => [%e transformer.list(
-          [%expr Belt.List.map(list, [%e forExpr(~renames, transformer, arg)])]
-        )]]
-
+        let name = switch input {
+          | Some(i) => i
+          | None => [%expr list]
+        };
+        let body = transformer.list(
+          [%expr Belt.List.map([%e name], [%e forExpr(~input=None, ~renames, transformer, arg)])]
+        );
+        switch input {
+          | Some(i) => body
+          | None => [%expr list => [%e body]]
+        }
       | _ =>
-        switch args {
+        maybeCall(switch args {
           | [] => transformer.source(source)
           | args => Exp.apply(
             transformer.source(source),
-            args->Belt.List.map(arg => (Nolabel, forExpr(~renames, transformer, arg)))
+            args->Belt.List.map(arg => (Nolabel, forExpr(~input=None, ~renames, transformer, arg)))
           )
-        }
+        }, input)
     }
   | Tuple(items) =>
     let rec loop = (i, items) => switch items {
@@ -74,23 +173,18 @@ let rec forExpr = (~renames, transformer, t) => switch t {
           Pat.var(Location.mknoloc(name)),
           ...pats
         ], [
-          Exp.apply(forExpr(~renames, transformer, arg), [
-            (Nolabel, Exp.ident(Location.mknoloc(Lident(name))))
-          ]),
+          forExpr(~input=Some(Exp.ident(Location.mknoloc(Lident(name)))), ~renames, transformer, arg),
           ...exps
         ])
     };
     let (pats, exps) = loop(0, items);
-    Exp.fun_(Nolabel, None, Pat.tuple(pats),
-      transformer.tuple(exps)
+    fnOrLet(
+      transformer.tuple(exps),
+      input,
+      Pat.tuple(pats)
     )
   | RowVariant(rows, _closed) =>
-    Exp.fun_(
-      Nolabel,
-      None,
-      Pat.var(Location.mknoloc("constructor")),
-      Exp.match(
-        makeIdent(Lident("constructor")),
+  let cases = 
         rows->Belt.List.map(((name, arg)) => {
           Exp.case(
             Pat.variant(
@@ -105,17 +199,24 @@ let rec forExpr = (~renames, transformer, t) => switch t {
               switch arg {
                 | None => []
                 | Some(arg) =>
-                  [Exp.apply(
-                    forExpr(~renames, transformer, arg),
-                    [(Nolabel, [%expr arg])],
-                  )]
+                  [forExpr(~input=Some([%expr arg]), ~renames, transformer, arg)]
               }
             )
           )
-
-        })
-      )
-    )
+        });
+    switch input {
+      | None => [%expr constructor => [%e Exp.match([%expr constructor], cases)]]
+      | Some(input) => Exp.match(input, cases)
+    }
+    // Exp.fun_(
+    //   Nolabel,
+    //   None,
+    //   Pat.var(Location.mknoloc("constructor")),
+    //   Exp.match(
+    //     makeIdent(Lident("constructor")),
+    //     cases
+    //   )
+    // )
   | _ => failer("not impl expr")
 };
 
@@ -138,69 +239,26 @@ let forBody = (~helpers, ~renames, transformer, body, fullName, variables) => sw
       ))
     }
   | Expr(e) =>
-    Exp.fun_(
-      Nolabel,
-      None,
-      Pat.var(Location.mknoloc("value")),
-      Exp.apply(forExpr(~renames, transformer, e), [
-        (Nolabel, makeIdent(Lident("value")))])
-    )
+    forExpr(~input=Some([%expr value]), ~renames, transformer, e)
   | Record(items) =>
-    Exp.fun_(
-      Nolabel,
-      None,
-      /* Pat.constraint_( */
-        Pat.var(Location.mknoloc("record")),
-        /* coreType */
-      /* ), */
-      transformer.record(~renames, items->Belt.List.map(((label, expr)) => {
-        (label,
-          Exp.apply(
-            forExpr(~renames, transformer, expr),
-            [(Nolabel, Exp.field(makeIdent(Lident("record")),
-            Location.mknoloc(Lident(label))
-            ))]
-          )
-        )
-      })
-      )
-    )
+    [%expr record => [%e transformer.record(~renames, serializeRecord(
+      ~valueName="record",
+      items,
+      (~input, expr) => forExpr(~input=Some(input), ~renames, transformer, expr)
+    ))]]
   | Variant(constructors) =>
-    Exp.fun_(
-      Nolabel,
-      None,
-      /* Pat.constraint_( */
-        Pat.var(Location.mknoloc("constructor")),
-        /* coreType */
-      /* ), */
-      Exp.match(
-        makeIdent(Lident("constructor")),
-        constructors->Belt.List.map(((name, args, _result)) => {
-          Exp.case(
-            Pat.construct(
-              Location.mknoloc(Lident(name)),
-              switch args {
-                | [] => None
-                | [_] => Some(Pat.var(Location.mknoloc("arg0")))
-                | many => Some(Pat.tuple(
-                  many->Belt.List.mapWithIndex((index, _) => (
-                    Pat.var(Location.mknoloc("arg" ++ string_of_int(index)))
-                  ))
-                ))
-              }
-            ),
-            transformer.constructor(
-              ~renames, name,
-              args->Belt.List.mapWithIndex((index, arg) => {
-                Exp.apply(forExpr(~renames, transformer, arg),
-                [(Nolabel, makeIdent(Lident("arg" ++ string_of_int(index))))])
-              })
-            )
-          )
-
-        })
-      )
-    )
+    [%expr
+      constructor => [%e
+        Exp.match(
+          makeIdent(Lident("constructor")),
+          serializeVariant(
+            constructors,
+            (~input, expr) => forExpr(~input=Some(input), ~renames, transformer, expr),
+            transformer.constructor(~renames),
+          ),
+        )
+      ]
+    ];
 };
 
 let makeTypArgs = variables =>

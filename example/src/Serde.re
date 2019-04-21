@@ -2332,42 +2332,27 @@ module Version7 = {
           ),
           (
             "people",
-            (
-              list =>
-                Js.Json.array(
-                  Belt.List.toArray(
-                    Belt.List.map(list, serialize_Types____person),
-                  ),
-                )
-            )(
-              record.people,
+            Js.Json.array(
+              Belt.List.toArray(
+                Belt.List.map(record.people, serialize_Types____person),
+              ),
             ),
           ),
           (
             "pets",
-            (
-              list =>
-                Js.Json.array(
-                  Belt.List.toArray(
-                    Belt.List.map(list, serialize_Types____pet),
-                  ),
-                )
-            )(
-              record.pets,
+            Js.Json.array(
+              Belt.List.toArray(
+                Belt.List.map(record.pets, serialize_Types____pet),
+              ),
             ),
           ),
           ("what", (serialize_Types____what(Js.Json.string))(record.what)),
           (
             "visitors",
-            (
-              list =>
-                Js.Json.array(
-                  Belt.List.toArray(
-                    Belt.List.map(list, serialize_Types____person),
-                  ),
-                )
-            )(
-              record.visitors,
+            Js.Json.array(
+              Belt.List.toArray(
+                Belt.List.map(record.visitors, serialize_Types____person),
+              ),
             ),
           ),
           (
@@ -2422,28 +2407,18 @@ module Version7 = {
           ("age", Js.Json.number(record.age)),
           (
             "thing",
-            (
-              constructor =>
-                switch (constructor) {
-                | `one => Js.Json.array([|Js.Json.string("one")|])
-                | `two => Js.Json.array([|Js.Json.string("two")|])
-                | `three => Js.Json.array([|Js.Json.string("three")|])
-                }
-            )(
-              record.thing,
-            ),
+            switch (record.thing) {
+            | `one => Js.Json.array([|Js.Json.string("one")|])
+            | `two => Js.Json.array([|Js.Json.string("two")|])
+            | `three => Js.Json.array([|Js.Json.string("three")|])
+            },
           ),
           (
             "coords",
-            (
-              ((arg0, arg1)) =>
-                Js.Json.array([|
-                  Js.Json.number(arg0),
-                  Js.Json.number(arg1),
-                |])
-            )(
-              record.coords,
-            ),
+            {
+              let (arg0, arg1) = record.coords;
+              Js.Json.array([|Js.Json.number(arg0), Js.Json.number(arg1)|]);
+            },
           ),
         |]),
       )
