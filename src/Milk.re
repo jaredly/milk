@@ -123,6 +123,11 @@ let outputStructure = (~fileName, ~structure) => {
   Files.writeFile(fileName, Format.flush_str_formatter()) |> ignore;
 };
 
+let init = (dest) => {
+  let json = TypeMapSerde.configToJson(TypeMapSerde.Config.empty);
+  Files.writeFileExn(dest, Json.stringifyPretty(~indent=2, json));
+};
+
 let main = (~upvert=false, ~override=false, ~json, configPath) => {
   // let json = Json.parse(Util.Files.readFileExn(configPath));
   let%try_force config =

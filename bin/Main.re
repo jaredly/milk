@@ -70,6 +70,11 @@ let args = switch (Sys.argv->Belt.List.fromArray) {
 
 switch (parse(args)) {
   | (_, opts) when opts->Belt.List.some(arg => arg == "-h" || arg == "--help") => help();
+  | (config, opts) when opts->Belt.List.some(arg => arg == "--init") =>
+    Milk.init(switch config {
+      | None => "types.json"
+      | Some(config) => config
+    })
   | (config, opts) =>
     let (json, configPath) = switch config {
       | None =>

@@ -111,6 +111,32 @@ type t = {
   custom: list(custom),
 };
 
+let empty = {
+  version: 0,
+  minVersion: None,
+  lockedTypes: None,
+  engines: {
+    rex_json: None,
+    bs_json: Some({
+      output: "src/TypeSerde.re",
+      helpers: None,
+      options: None,
+    }),
+    ezjsonm: None,
+    yojson: None,
+  },
+  globalEngines: None,
+  entries: [{
+    file: "src/Types.re",
+    type_: "config",
+    publicName: None,
+    engines: None,
+    history: None,
+    minVersion: None,
+  }],
+  custom: [],
+}
+
 module Locked = {
   [@migrate.engines l => []]
   type lockedEntry = {
