@@ -3893,7 +3893,7 @@ module Version2 = {
       Belt.Result.t(_TypeMap__DigTypes__typeSource(arg0), list(string)) = Version1.deserialize_TypeMap__DigTypes____typeSource
   and serialize_Analyze__TopTypes____moduleName:
     _Analyze__TopTypes__moduleName => target =
-    value => (s => Json.String(s))(value)
+    value => Json.String(value)
   and serialize_Asttypes____loc:
     'arg0.
     ('arg0 => target, _Asttypes__loc('arg0)) => target
@@ -3911,27 +3911,19 @@ module Version2 = {
           serialize_Stdlib__lexing____position(record.loc_start),
         ),
         ("loc_end", serialize_Stdlib__lexing____position(record.loc_end)),
-        ("loc_ghost", (b => b ? Json.True : Json.False)(record.loc_ghost)),
+        ("loc_ghost", record.loc_ghost ? Json.True : Json.False),
       ])
   and serialize_Parsetree____attribute: _Parsetree__attribute => target =
-    value =>
-      (
-        ((arg0, arg1)) =>
-          Json.Array([
-            (serialize_Asttypes____loc(s => Json.String(s)))(arg0),
-            serialize_Parsetree____payload(arg1),
-          ])
-      )(
-        value,
-      )
+    value => {
+      let (arg0, arg1) = value;
+      Json.Array([
+        serialize_Asttypes____loc(value => Json.String(value), arg0),
+        serialize_Parsetree____payload(arg1),
+      ]);
+    }
   and serialize_Parsetree____attributes: _Parsetree__attributes => target =
     value =>
-      (
-        list =>
-          Json.Array(Belt.List.map(list, serialize_Parsetree____attribute))
-      )(
-        value,
-      )
+      Json.Array(Belt.List.map(value, serialize_Parsetree____attribute))
   and serialize_Parsetree____core_type: _Parsetree__core_type => target = TransformHelpers.serialize_Parsetree____core_type
   and serialize_Parsetree____expression: _Parsetree__expression => target = TransformHelpers.serialize_Parsetree____expression
   and serialize_Parsetree____pattern: _Parsetree__pattern => target = TransformHelpers.serialize_Parsetree____pattern
@@ -3957,18 +3949,10 @@ module Version2 = {
         Json.Array([
           Json.String("PPat"),
           serialize_Parsetree____pattern(arg0),
-          (
-            (
-              transformer =>
-                fun
-                | None => Json.Null
-                | Some(v) => transformer(v)
-            )(
-              serialize_Parsetree____expression,
-            )
-          )(
-            arg1,
-          ),
+          switch (arg1) {
+          | None => Json.Null
+          | Some(v) => serialize_Parsetree____expression(v)
+          },
         ])
       }
   and serialize_Parsetree____signature: _Parsetree__signature => target = TransformHelpers.serialize_Parsetree____signature
@@ -3984,72 +3968,47 @@ module Version2 = {
       | Expr(arg0) =>
         Json.Array([
           Json.String("Expr"),
-          (serialize_SharedTypes__SimpleType__expr(sourceTransformer))(arg0),
+          serialize_SharedTypes__SimpleType__expr(sourceTransformer, arg0),
         ])
       | Record(arg0) =>
         Json.Array([
           Json.String("Record"),
-          (
-            list =>
-              Json.Array(
-                Belt.List.map(list, ((arg0, arg1)) =>
-                  Json.Array([
-                    (s => Json.String(s))(arg0),
-                    (
-                      serialize_SharedTypes__SimpleType__expr(
-                        sourceTransformer,
-                      )
-                    )(
-                      arg1,
-                    ),
-                  ])
+          Json.Array(
+            Belt.List.map(arg0, ((arg0, arg1)) =>
+              Json.Array([
+                Json.String(arg0),
+                serialize_SharedTypes__SimpleType__expr(
+                  sourceTransformer,
+                  arg1,
                 ),
-              )
-          )(
-            arg0,
+              ])
+            ),
           ),
         ])
       | Variant(arg0) =>
         Json.Array([
           Json.String("Variant"),
-          (
-            list =>
-              Json.Array(
-                Belt.List.map(list, ((arg0, arg1, arg2)) =>
-                  Json.Array([
-                    (s => Json.String(s))(arg0),
-                    (
-                      list =>
-                        Json.Array(
-                          Belt.List.map(
-                            list,
-                            serialize_SharedTypes__SimpleType__expr(
-                              sourceTransformer,
-                            ),
-                          ),
-                        )
-                    )(
-                      arg1,
+          Json.Array(
+            Belt.List.map(arg0, ((arg0, arg1, arg2)) =>
+              Json.Array([
+                Json.String(arg0),
+                Json.Array(
+                  Belt.List.map(
+                    arg1,
+                    serialize_SharedTypes__SimpleType__expr(
+                      sourceTransformer,
                     ),
-                    (
-                      (
-                        transformer =>
-                          fun
-                          | None => Json.Null
-                          | Some(v) => transformer(v)
-                      )(
-                        serialize_SharedTypes__SimpleType__expr(
-                          sourceTransformer,
-                        ),
-                      )
-                    )(
-                      arg2,
-                    ),
-                  ])
+                  ),
                 ),
-              )
-          )(
-            arg0,
+                switch (arg2) {
+                | None => Json.Null
+                | Some(v) =>
+                  (serialize_SharedTypes__SimpleType__expr(sourceTransformer))(
+                    v,
+                  )
+                },
+              ])
+            ),
           ),
         ])
       }
@@ -4059,24 +4018,20 @@ module Version2 = {
    =
     (sourceTransformer, record) =>
       Json.Object([
-        ("name", (s => Json.String(s))(record.name)),
+        ("name", Json.String(record.name)),
         (
           "variables",
-          (
-            list =>
-              Json.Array(
-                Belt.List.map(
-                  list,
-                  serialize_SharedTypes__SimpleType__expr(sourceTransformer),
-                ),
-              )
-          )(
-            record.variables,
+          Json.Array(
+            Belt.List.map(
+              record.variables,
+              serialize_SharedTypes__SimpleType__expr(sourceTransformer),
+            ),
           ),
         ),
         (
           "body",
-          (serialize_SharedTypes__SimpleType__body(sourceTransformer))(
+          serialize_SharedTypes__SimpleType__body(
+            sourceTransformer,
             record.body,
           ),
         ),
@@ -4088,105 +4043,66 @@ module Version2 = {
     (sourceTransformer, constructor) =>
       switch (constructor) {
       | Variable(arg0) =>
-        Json.Array([Json.String("Variable"), (s => Json.String(s))(arg0)])
+        Json.Array([Json.String("Variable"), Json.String(arg0)])
       | AnonVariable => Json.Array([Json.String("AnonVariable")])
       | [@implicit_arity] RowVariant(arg0, arg1) =>
         Json.Array([
           Json.String("RowVariant"),
-          (
-            list =>
-              Json.Array(
-                Belt.List.map(list, ((arg0, arg1)) =>
-                  Json.Array([
-                    (s => Json.String(s))(arg0),
-                    (
-                      (
-                        transformer =>
-                          fun
-                          | None => Json.Null
-                          | Some(v) => transformer(v)
-                      )(
-                        serialize_SharedTypes__SimpleType__expr(
-                          sourceTransformer,
-                        ),
-                      )
-                    )(
-                      arg1,
-                    ),
-                  ])
-                ),
-              )
-          )(
-            arg0,
+          Json.Array(
+            Belt.List.map(arg0, ((arg0, arg1)) =>
+              Json.Array([
+                Json.String(arg0),
+                switch (arg1) {
+                | None => Json.Null
+                | Some(v) =>
+                  (serialize_SharedTypes__SimpleType__expr(sourceTransformer))(
+                    v,
+                  )
+                },
+              ])
+            ),
           ),
-          (b => b ? Json.True : Json.False)(arg1),
+          arg1 ? Json.True : Json.False,
         ])
       | [@implicit_arity] Reference(arg0, arg1) =>
         Json.Array([
           Json.String("Reference"),
           sourceTransformer(arg0),
-          (
-            list =>
-              Json.Array(
-                Belt.List.map(
-                  list,
-                  serialize_SharedTypes__SimpleType__expr(sourceTransformer),
-                ),
-              )
-          )(
-            arg1,
+          Json.Array(
+            Belt.List.map(
+              arg1,
+              serialize_SharedTypes__SimpleType__expr(sourceTransformer),
+            ),
           ),
         ])
       | Tuple(arg0) =>
         Json.Array([
           Json.String("Tuple"),
-          (
-            list =>
-              Json.Array(
-                Belt.List.map(
-                  list,
-                  serialize_SharedTypes__SimpleType__expr(sourceTransformer),
-                ),
-              )
-          )(
-            arg0,
+          Json.Array(
+            Belt.List.map(
+              arg0,
+              serialize_SharedTypes__SimpleType__expr(sourceTransformer),
+            ),
           ),
         ])
       | [@implicit_arity] Fn(arg0, arg1) =>
         Json.Array([
           Json.String("Fn"),
-          (
-            list =>
-              Json.Array(
-                Belt.List.map(list, ((arg0, arg1)) =>
-                  Json.Array([
-                    (
-                      (
-                        transformer =>
-                          fun
-                          | None => Json.Null
-                          | Some(v) => transformer(v)
-                      )(
-                        s =>
-                        Json.String(s)
-                      )
-                    )(
-                      arg0,
-                    ),
-                    (
-                      serialize_SharedTypes__SimpleType__expr(
-                        sourceTransformer,
-                      )
-                    )(
-                      arg1,
-                    ),
-                  ])
+          Json.Array(
+            Belt.List.map(arg0, ((arg0, arg1)) =>
+              Json.Array([
+                switch (arg0) {
+                | None => Json.Null
+                | Some(v) => (value => Json.String(value))(v)
+                },
+                serialize_SharedTypes__SimpleType__expr(
+                  sourceTransformer,
+                  arg1,
                 ),
-              )
-          )(
-            arg0,
+              ])
+            ),
           ),
-          (serialize_SharedTypes__SimpleType__expr(sourceTransformer))(arg1),
+          serialize_SharedTypes__SimpleType__expr(sourceTransformer, arg1),
         ])
       | Other => Json.Array([Json.String("Other")])
       }
@@ -4203,39 +4119,36 @@ module Version2 = {
   and serialize_Stdlib__lexing____position: _Stdlib__lexing__position => target =
     record =>
       Json.Object([
-        ("pos_fname", (s => Json.String(s))(record.pos_fname)),
-        ("pos_lnum", (i => Json.Number(float_of_int(i)))(record.pos_lnum)),
-        ("pos_bol", (i => Json.Number(float_of_int(i)))(record.pos_bol)),
-        ("pos_cnum", (i => Json.Number(float_of_int(i)))(record.pos_cnum)),
+        ("pos_fname", Json.String(record.pos_fname)),
+        ("pos_lnum", Json.Number(float_of_int(record.pos_lnum))),
+        ("pos_bol", Json.Number(float_of_int(record.pos_bol))),
+        ("pos_cnum", Json.Number(float_of_int(record.pos_cnum))),
       ])
   and serialize_TypeMapSerde__Config____custom:
     _TypeMapSerde__Config__custom => target =
     record =>
       Json.Object([
-        ("module", (s => Json.String(s))(record.module_)),
+        ("module", Json.String(record.module_)),
         (
           "path",
-          (list => Json.Array(Belt.List.map(list, s => Json.String(s))))(
-            record.path,
+          Json.Array(
+            Belt.List.map(record.path, value => Json.String(value)),
           ),
         ),
-        ("name", (s => Json.String(s))(record.name)),
-        (
-          "args",
-          (
-            (
-              transformer =>
-                fun
-                | None => Json.Null
-                | Some(v) => transformer(v)
-            )(
-              i =>
-              Json.Number(float_of_int(i))
-            )
-          )(
-            record.args,
-          ),
-        ),
+        ("name", Json.String(record.name)),
+        ...{
+             let rest = [];
+             switch (
+               "args",
+               switch (record.args) {
+               | None => Json.Null
+               | Some(v) => (value => Json.Number(float_of_int(value)))(v)
+               },
+             ) {
+             | (_, Json.Null) => rest
+             | x => [x, ...rest]
+             };
+           },
       ])
   and serialize_TypeMapSerde__Config____engine:
     _TypeMapSerde__Config__engine => target =
@@ -4250,44 +4163,39 @@ module Version2 = {
     _TypeMapSerde__Config__engineConfig => target =
     record =>
       Json.Object([
-        ("output", (s => Json.String(s))(record.output)),
-        (
-          "helpers",
-          (
-            (
-              transformer =>
-                fun
-                | None => Json.Null
-                | Some(v) => transformer(v)
-            )(
-              s =>
-              Json.String(s)
-            )
-          )(
-            record.helpers,
-          ),
-        ),
-        (
-          "options",
-          (
-            (
-              transformer =>
-                fun
-                | None => Json.Null
-                | Some(v) => transformer(v)
-            )(
-              serialize_TypeMapSerde__Config____engineOptions,
-            )
-          )(
-            record.options,
-          ),
-        ),
+        ("output", Json.String(record.output)),
+        ...{
+             let rest = {
+               let rest = [];
+               switch (
+                 "options",
+                 switch (record.options) {
+                 | None => Json.Null
+                 | Some(v) =>
+                   serialize_TypeMapSerde__Config____engineOptions(v)
+                 },
+               ) {
+               | (_, Json.Null) => rest
+               | x => [x, ...rest]
+               };
+             };
+             switch (
+               "helpers",
+               switch (record.helpers) {
+               | None => Json.Null
+               | Some(v) => (value => Json.String(value))(v)
+               },
+             ) {
+             | (_, Json.Null) => rest
+             | x => [x, ...rest]
+             };
+           },
       ])
   and serialize_TypeMapSerde__Config____engineOptions:
     _TypeMapSerde__Config__engineOptions => target =
     record =>
       Json.Object([
-        ("tailCall", (b => b ? Json.True : Json.False)(record.tailCall)),
+        ("tailCall", record.tailCall ? Json.True : Json.False),
         (
           "deserializeErrorMode",
           serialize_TypeMapSerde__Config____errorMode(
@@ -4298,140 +4206,125 @@ module Version2 = {
   and serialize_TypeMapSerde__Config____engines:
     _TypeMapSerde__Config__engines => target =
     record =>
-      Json.Object([
-        (
-          "rex-json",
-          (
-            (
-              transformer =>
-                fun
+      Json.Object(
+        {
+          let rest = {
+            let rest = {
+              let rest = {
+                let rest = [];
+                switch (
+                  "yojson",
+                  switch (record.yojson) {
+                  | None => Json.Null
+                  | Some(v) =>
+                    serialize_TypeMapSerde__Config____engineConfig(v)
+                  },
+                ) {
+                | (_, Json.Null) => rest
+                | x => [x, ...rest]
+                };
+              };
+              switch (
+                "ezjsonm",
+                switch (record.ezjsonm) {
                 | None => Json.Null
-                | Some(v) => transformer(v)
-            )(
-              serialize_TypeMapSerde__Config____engineConfig,
-            )
-          )(
-            record.rex_json,
-          ),
-        ),
-        (
-          "Js.Json",
-          (
-            (
-              transformer =>
-                fun
-                | None => Json.Null
-                | Some(v) => transformer(v)
-            )(
-              serialize_TypeMapSerde__Config____engineConfig,
-            )
-          )(
-            record.bs_json,
-          ),
-        ),
-        (
-          "ezjsonm",
-          (
-            (
-              transformer =>
-                fun
-                | None => Json.Null
-                | Some(v) => transformer(v)
-            )(
-              serialize_TypeMapSerde__Config____engineConfig,
-            )
-          )(
-            record.ezjsonm,
-          ),
-        ),
-        (
-          "yojson",
-          (
-            (
-              transformer =>
-                fun
-                | None => Json.Null
-                | Some(v) => transformer(v)
-            )(
-              serialize_TypeMapSerde__Config____engineConfig,
-            )
-          )(
-            record.yojson,
-          ),
-        ),
-      ])
+                | Some(v) => serialize_TypeMapSerde__Config____engineConfig(v)
+                },
+              ) {
+              | (_, Json.Null) => rest
+              | x => [x, ...rest]
+              };
+            };
+            switch (
+              "Js.Json",
+              switch (record.bs_json) {
+              | None => Json.Null
+              | Some(v) => serialize_TypeMapSerde__Config____engineConfig(v)
+              },
+            ) {
+            | (_, Json.Null) => rest
+            | x => [x, ...rest]
+            };
+          };
+          switch (
+            "rex-json",
+            switch (record.rex_json) {
+            | None => Json.Null
+            | Some(v) => serialize_TypeMapSerde__Config____engineConfig(v)
+            },
+          ) {
+          | (_, Json.Null) => rest
+          | x => [x, ...rest]
+          };
+        },
+      )
   and serialize_TypeMapSerde__Config____entry:
     _TypeMapSerde__Config__entry => target =
     record =>
       Json.Object([
-        ("file", (s => Json.String(s))(record.file)),
-        ("type", (s => Json.String(s))(record.type_)),
-        (
-          "engines",
-          (
-            (
-              transformer =>
-                fun
-                | None => Json.Null
-                | Some(v) => transformer(v)
-            )(
-              list =>
-              Json.Array(
-                Belt.List.map(list, serialize_TypeMapSerde__Config____engine),
-              )
-            )
-          )(
-            record.engines,
-          ),
-        ),
-        (
-          "publicName",
-          (
-            (
-              transformer =>
-                fun
-                | None => Json.Null
-                | Some(v) => transformer(v)
-            )(
-              s =>
-              Json.String(s)
-            )
-          )(
-            record.publicName,
-          ),
-        ),
-        (
-          "history",
-          (
-            (
-              transformer =>
-                fun
-                | None => Json.Null
-                | Some(v) => transformer(v)
-            )(
-              b =>
-              b ? Json.True : Json.False
-            )
-          )(
-            record.history,
-          ),
-        ),
-        (
-          "minVersion",
-          (
-            (
-              transformer =>
-                fun
-                | None => Json.Null
-                | Some(v) => transformer(v)
-            )(
-              i =>
-              Json.Number(float_of_int(i))
-            )
-          )(
-            record.minVersion,
-          ),
-        ),
+        ("file", Json.String(record.file)),
+        ("type", Json.String(record.type_)),
+        ...{
+             let rest = {
+               let rest = {
+                 let rest = {
+                   let rest = [];
+                   switch (
+                     "minVersion",
+                     switch (record.minVersion) {
+                     | None => Json.Null
+                     | Some(v) =>
+                       (value => Json.Number(float_of_int(value)))(v)
+                     },
+                   ) {
+                   | (_, Json.Null) => rest
+                   | x => [x, ...rest]
+                   };
+                 };
+                 switch (
+                   "history",
+                   switch (record.history) {
+                   | None => Json.Null
+                   | Some(v) => (value => value ? Json.True : Json.False)(v)
+                   },
+                 ) {
+                 | (_, Json.Null) => rest
+                 | x => [x, ...rest]
+                 };
+               };
+               switch (
+                 "publicName",
+                 switch (record.publicName) {
+                 | None => Json.Null
+                 | Some(v) => (value => Json.String(value))(v)
+                 },
+               ) {
+               | (_, Json.Null) => rest
+               | x => [x, ...rest]
+               };
+             };
+             switch (
+               "engines",
+               switch (record.engines) {
+               | None => Json.Null
+               | Some(v) =>
+                 (
+                   value =>
+                     Json.Array(
+                       Belt.List.map(
+                         value,
+                         serialize_TypeMapSerde__Config____engine,
+                       ),
+                     )
+                 )(
+                   v,
+                 )
+               },
+             ) {
+             | (_, Json.Null) => rest
+             | x => [x, ...rest]
+             };
+           },
       ])
   and serialize_TypeMapSerde__Config____errorMode:
     _TypeMapSerde__Config__errorMode => target =
@@ -4444,117 +4337,105 @@ module Version2 = {
   and serialize_TypeMapSerde__Config____serializableLockfile:
     _TypeMapSerde__Config__serializableLockfile => target =
     value =>
-      (
-        serialize_TypeMapSerde__Config__Locked__lockfile(
-          serialize_TypeMap__DigTypes____shortReference,
-        )
-      )(
+      serialize_TypeMapSerde__Config__Locked__lockfile(
+        serialize_TypeMap__DigTypes____shortReference,
         value,
       )
   and serialize_TypeMapSerde__Config____simpleDeclaration:
     _TypeMapSerde__Config__simpleDeclaration => target =
     value =>
-      (
-        serialize_SharedTypes__SimpleType__declaration(
-          serialize_TypeMap__DigTypes____typeSource(
-            serialize_TypeMap__DigTypes____shortReference,
-          ),
-        )
-      )(
+      serialize_SharedTypes__SimpleType__declaration(
+        serialize_TypeMap__DigTypes____typeSource(
+          serialize_TypeMap__DigTypes____shortReference,
+        ),
         value,
       )
   and serialize_TypeMapSerde__Config____simpleExpr:
     _TypeMapSerde__Config__simpleExpr => target =
     value =>
-      (
-        serialize_SharedTypes__SimpleType__expr(
-          serialize_TypeMap__DigTypes____typeSource(
-            serialize_TypeMap__DigTypes____shortReference,
-          ),
-        )
-      )(
+      serialize_SharedTypes__SimpleType__expr(
+        serialize_TypeMap__DigTypes____typeSource(
+          serialize_TypeMap__DigTypes____shortReference,
+        ),
         value,
       )
   and serialize_TypeMapSerde__Config____t: _TypeMapSerde__Config__t => target =
     record =>
       Json.Object([
-        ("version", (i => Json.Number(float_of_int(i)))(record.version)),
-        (
-          "minVersion",
-          (
-            (
-              transformer =>
-                fun
-                | None => Json.Null
-                | Some(v) => transformer(v)
-            )(
-              i =>
-              Json.Number(float_of_int(i))
-            )
-          )(
-            record.minVersion,
-          ),
-        ),
-        (
-          "lockedTypes",
-          (
-            (
-              transformer =>
-                fun
-                | None => Json.Null
-                | Some(v) => transformer(v)
-            )(
-              s =>
-              Json.String(s)
-            )
-          )(
-            record.lockedTypes,
-          ),
-        ),
-        (
-          "engines",
-          serialize_TypeMapSerde__Config____engines(record.engines),
-        ),
-        (
-          "globalEngines",
-          (
-            (
-              transformer =>
-                fun
-                | None => Json.Null
-                | Some(v) => transformer(v)
-            )(
-              list =>
-              Json.Array(
-                Belt.List.map(list, serialize_TypeMapSerde__Config____engine),
-              )
-            )
-          )(
-            record.globalEngines,
-          ),
-        ),
-        (
-          "entries",
-          (
-            list =>
-              Json.Array(
-                Belt.List.map(list, serialize_TypeMapSerde__Config____entry),
-              )
-          )(
-            record.entries,
-          ),
-        ),
-        (
-          "custom",
-          (
-            list =>
-              Json.Array(
-                Belt.List.map(list, serialize_TypeMapSerde__Config____custom),
-              )
-          )(
-            record.custom,
-          ),
-        ),
+        ("version", Json.Number(float_of_int(record.version))),
+        ...{
+             let rest = {
+               let rest = [
+                 (
+                   "engines",
+                   serialize_TypeMapSerde__Config____engines(record.engines),
+                 ),
+                 ...{
+                      let rest = [
+                        (
+                          "entries",
+                          Json.Array(
+                            Belt.List.map(
+                              record.entries,
+                              serialize_TypeMapSerde__Config____entry,
+                            ),
+                          ),
+                        ),
+                        (
+                          "custom",
+                          Json.Array(
+                            Belt.List.map(
+                              record.custom,
+                              serialize_TypeMapSerde__Config____custom,
+                            ),
+                          ),
+                        ),
+                      ];
+                      switch (
+                        "globalEngines",
+                        switch (record.globalEngines) {
+                        | None => Json.Null
+                        | Some(v) =>
+                          (
+                            value =>
+                              Json.Array(
+                                Belt.List.map(
+                                  value,
+                                  serialize_TypeMapSerde__Config____engine,
+                                ),
+                              )
+                          )(
+                            v,
+                          )
+                        },
+                      ) {
+                      | (_, Json.Null) => rest
+                      | x => [x, ...rest]
+                      };
+                    },
+               ];
+               switch (
+                 "lockedTypes",
+                 switch (record.lockedTypes) {
+                 | None => Json.Null
+                 | Some(v) => (value => Json.String(value))(v)
+                 },
+               ) {
+               | (_, Json.Null) => rest
+               | x => [x, ...rest]
+               };
+             };
+             switch (
+               "minVersion",
+               switch (record.minVersion) {
+               | None => Json.Null
+               | Some(v) => (value => Json.Number(float_of_int(value)))(v)
+               },
+             ) {
+             | (_, Json.Null) => rest
+             | x => [x, ...rest]
+             };
+           },
       ])
   and serialize_TypeMapSerde__Config__Locked__lockedConfig:
     'arg0.
@@ -4565,21 +4446,17 @@ module Version2 = {
       Json.Object([
         (
           "entries",
-          (
-            list =>
-              Json.Array(
-                Belt.List.map(
-                  list,
-                  serialize_TypeMapSerde__Config__Locked__lockedEntry,
-                ),
-              )
-          )(
-            record.entries,
+          Json.Array(
+            Belt.List.map(
+              record.entries,
+              serialize_TypeMapSerde__Config__Locked__lockedEntry,
+            ),
           ),
         ),
         (
           "typeMap",
-          (serialize_TypeMap__DigTypes____typeMap(referenceTransformer))(
+          serialize_TypeMap__DigTypes____typeMap(
+            referenceTransformer,
             record.typeMap,
           ),
         ),
@@ -4588,30 +4465,25 @@ module Version2 = {
     _TypeMapSerde__Config__Locked__lockedEntry => target =
     record =>
       Json.Object([
-        ("moduleName", (s => Json.String(s))(record.moduleName)),
+        ("moduleName", Json.String(record.moduleName)),
         (
           "modulePath",
-          (list => Json.Array(Belt.List.map(list, s => Json.String(s))))(
-            record.modulePath,
+          Json.Array(
+            Belt.List.map(record.modulePath, value => Json.String(value)),
           ),
         ),
         (
           "engines",
-          (
-            list =>
-              Json.Array(
-                Belt.List.map(list, ((arg0, arg1)) =>
-                  Json.Array([
-                    serialize_TypeMapSerde__Config____engine(arg0),
-                    (i => Json.Number(float_of_int(i)))(arg1),
-                  ])
-                ),
-              )
-          )(
-            record.engines,
+          Json.Array(
+            Belt.List.map(record.engines, ((arg0, arg1)) =>
+              Json.Array([
+                serialize_TypeMapSerde__Config____engine(arg0),
+                Json.Number(float_of_int(arg1)),
+              ])
+            ),
           ),
         ),
-        ("name", (s => Json.String(s))(record.name)),
+        ("name", Json.String(record.name)),
       ])
   and serialize_TypeMapSerde__Config__Locked__lockfile:
     'arg0.
@@ -4622,59 +4494,43 @@ module Version2 = {
       Json.Object([
         (
           "versions",
-          (
-            (
-              (transformer, array) =>
-                Json.Array(
-                  Belt.List.fromArray(Belt.Array.map(array, transformer)),
-                )
-            )(
-              serialize_TypeMapSerde__Config__Locked__lockedConfig(
-                referenceTransformer,
+          Json.Array(
+            Belt.List.fromArray(
+              Belt.Array.map(
+                record.versions,
+                serialize_TypeMapSerde__Config__Locked__lockedConfig(
+                  referenceTransformer,
+                ),
               ),
-            )
-          )(
-            record.versions,
+            ),
           ),
         ),
       ])
   and serialize_TypeMap__DigTypes____shortReference:
     _TypeMap__DigTypes__shortReference => target =
-    value =>
-      (
-        ((arg0, arg1, arg2)) =>
-          Json.Array([
-            serialize_Analyze__TopTypes____moduleName(arg0),
-            (list => Json.Array(Belt.List.map(list, s => Json.String(s))))(
-              arg1,
-            ),
-            (s => Json.String(s))(arg2),
-          ])
-      )(
-        value,
-      )
+    value => {
+      let (arg0, arg1, arg2) = value;
+      Json.Array([
+        serialize_Analyze__TopTypes____moduleName(arg0),
+        Json.Array(Belt.List.map(arg1, value => Json.String(value))),
+        Json.String(arg2),
+      ]);
+    }
   and serialize_TypeMap__DigTypes____typeMap:
     'arg0.
     ('arg0 => target, _TypeMap__DigTypes__typeMap('arg0)) => target
    =
     (referenceTransformer, value) =>
-      (
-        serialize_Stdlib__hashtbl____t(
-          serialize_TypeMap__DigTypes____shortReference, ((arg0, arg1)) =>
+      serialize_Stdlib__hashtbl____t(
+        serialize_TypeMap__DigTypes____shortReference,
+        ((arg0, arg1)) =>
           Json.Array([
             serialize_Parsetree____attributes(arg0),
-            (
-              serialize_SharedTypes__SimpleType__declaration(
-                serialize_TypeMap__DigTypes____typeSource(
-                  referenceTransformer,
-                ),
-              )
-            )(
+            serialize_SharedTypes__SimpleType__declaration(
+              serialize_TypeMap__DigTypes____typeSource(referenceTransformer),
               arg1,
             ),
-          ])
-        )
-      )(
+          ]),
         value,
       )
   and serialize_TypeMap__DigTypes____typeSource:
@@ -4684,7 +4540,7 @@ module Version2 = {
     (referenceTransformer, constructor) =>
       switch (constructor) {
       | Builtin(arg0) =>
-        Json.Array([Json.String("Builtin"), (s => Json.String(s))(arg0)])
+        Json.Array([Json.String("Builtin"), Json.String(arg0)])
       | Public(arg0) =>
         Json.Array([Json.String("Public"), referenceTransformer(arg0)])
       | NotFound => Json.Array([Json.String("NotFound")])
