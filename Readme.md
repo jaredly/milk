@@ -10,7 +10,11 @@ If no config file is provided, `types.json` will be used if it exists,
 otherwise the `milk` section of esy.json or package.json will be used if
 it exists.
 
-Options: (rarely used)
+Options:
+
+- --init     : create a new config file for the current project
+
+(rarely used)
 
 - --override : Ignore current lockfile version, overriding conflicts.
                NOTE: This should only be passed if you have not stored any
