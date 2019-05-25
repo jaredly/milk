@@ -2,7 +2,7 @@
   "name": "@jaredly/milk",
   "version": "1.0.0",
   "scripts": {
-    "types": "dune exe milk"
+    "types": "dune exec milk"
   },
   "keywords": [
     "Reason",

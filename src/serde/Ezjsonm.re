@@ -62,7 +62,7 @@ let serializeTransformer =
     tuple: exps => [%expr `A([%e makeList(exps)])],
     record: (~renames, items) =>
       [%expr `O([%e 
-        makeList(items->Belt.List.map(((label, expr)) =>
+        makeList(items->Belt.List.map(((label, expr, _isOptional)) =>
           Exp.tuple([
             Exp.constant(Pconst_string(MakeDeserializer.getRename(~renames, label), None)),
             expr,

@@ -30,7 +30,12 @@ let serializeRecord = (~valueName, attributes, serializeExpr) => {
   let loc = Location.none;
   attributes->Belt.List.map(((label, expr)) => (
     label,
-    serializeExpr(~input=Exp.field(makeIdent(Lident(valueName)), Location.mknoloc(Lident(label))), expr)
+    serializeExpr(~input=Exp.field(makeIdent(Lident(valueName)), Location.mknoloc(Lident(label))), expr),
+        switch expr {
+          | Reference(DigTypes.Builtin("option"), [_]) => true
+          | _ => false
+        }
+
   ))
 };
 
@@ -127,7 +132,7 @@ type transformer('source) = {
   source: (~source: 'source, ~transformers: list(Parsetree.expression), ~input: option(Parsetree.expression)) => Parsetree.expression,
   list: (Parsetree.expression) => Parsetree.expression,
   tuple: (list(Parsetree.expression)) => Parsetree.expression,
-  record: (~renames: list((string, string)), list((string, Parsetree.expression))) => Parsetree.expression,
+  record: (~renames: list((string, string)), list((string, Parsetree.expression, bool))) => Parsetree.expression,
   constructor: (~renames: list((string, string)), string, list(Parsetree.expression)) => Parsetree.expression,
 };
 
@@ -240,7 +245,8 @@ let forBody = (~helpers, ~renames, transformer, body, fullName, variables) => sw
     [%expr record => [%e transformer.record(~renames, serializeRecord(
       ~valueName="record",
       items,
-      (~input, expr) => forExpr(~input=Some(input), ~renames, transformer, expr)
+      (~input, expr) => (
+        forExpr(~input=Some(input), ~renames, transformer, expr)      )
     ))]]
   | Variant(constructors) =>
     [%expr

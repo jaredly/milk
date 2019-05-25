@@ -66,7 +66,7 @@ let serializeTransformer =
     tuple: exps => [%expr Js.Json.array([%e Exp.array(exps)])],
     record: (~renames, items) =>
       jsonObject(
-        items->Belt.List.map(((label, expr)) =>
+        items->Belt.List.map(((label, expr, _isOptional)) =>
           Exp.tuple([
             stringConst(MakeDeserializer.getRename(~renames, label)),
             expr,

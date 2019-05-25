@@ -84,15 +84,40 @@ let serializeTransformer =
     source: sourceTransformer,
     list: jsonArray,
     tuple: exps => makeJson("Array", Some(makeList(exps))),
-    record: (~renames, items) =>
-      jsonObject(
-        items->Belt.List.map(((label, expr)) =>
+    record: (~renames, items) => {
+      let hasOptionals = items->Belt.List.some(((_, _, isOptional)) => isOptional);
+      // jsonObject(
+        let items = items->Belt.List.map(((label, expr, isOptional)) =>
+        (
+
           Exp.tuple([
             Exp.constant(Pconst_string(MakeDeserializer.getRename(~renames, label), None)),
             expr,
-          ])
-        ),
-      ),
+          ]),
+          isOptional
+        )
+        );
+        let contents = items->Belt.List.reduceReverse( 
+          Exp.construct(Location.mknoloc(Lident("[]")), None),
+          (rest, (expr, isOptional)) => {
+            if (isOptional) {
+              [%expr {
+                let rest = [%e rest];
+                switch ([%e expr]) {
+                  | (_, Json.Null) => rest
+                  | x => [x, ...rest]
+                }
+              }]
+            } else {
+              Exp.construct(Location.mknoloc(Lident("::")), Some(Exp.tuple([
+                expr, rest
+              ])))
+            }
+          }
+         );
+         [%expr Json.Object([%e contents])]
+      // )
+    },
     constructor: (~renames, name, args) =>
       makeJson(
         "Array",
