@@ -1,5 +1,4 @@
 [@ocaml.warning "-34"];
-let schemaPropertyName = "milkSchemaVersion";
 module Types1 = {
   type _Analyze__TopTypes__moduleName = string
   and _Asttypes__loc('a) =
@@ -170,6 +169,7 @@ module Types1 = {
 };
 let currentVersion = 1;
 type target = Json.t;
+let schemaPropertyName = "$schemaVersion";
 module Version1 = {
   open Types1;
   let rec deserialize_Analyze__TopTypes____moduleName:
