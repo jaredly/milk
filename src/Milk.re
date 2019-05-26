@@ -204,6 +204,7 @@ let main = (~upvert=false, ~override=false, ~json, configPath) => {
     [%str
       type target = [%t Engine.target];
     ] @
+    Engine.preamble @
     loop(1) @ (
       [%str
         module Current = [%m

@@ -7,6 +7,8 @@ open TypeMap;
 
 open Helpers;
 
+let preamble = [];
+
 // let makeJson = (kind, contents) => Exp.construct(Location.mknoloc(Ldot(Lident("Ezjsonm"), kind)), contents);
 // let jsonObject = items => makeJson("Object", Some(makeList(items)));
 // let jsonArray = items => makeJson("Array", Some(items));

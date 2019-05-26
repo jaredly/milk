@@ -444,18 +444,17 @@ module Types7 = {
 };
 let currentVersion = 7;
 type target = Js.Json.t;
+type result('a, 'b) = Belt.Result.t('a, 'b) = | Ok('a) | Error('b);
 module Version1 = {
   open Types1;
   let rec deserialize_Types____household:
-    target => Belt.Result.t(_Types__household, list(string)) =
+    target => result(_Types__household, list(string)) =
     record =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
         let inner = attr_pets => {
           let inner = attr_people =>
-            Belt.Result.Ok(
-              {people: attr_people, pets: attr_pets}: _Types__household,
-            );
+            Ok({people: attr_people, pets: attr_pets}: _Types__household);
           switch (Js.Dict.get(dict, "people")) {
           | None => Belt.Result.Error(["No attribute 'people'"])
           | Some(json) =>
@@ -530,7 +529,7 @@ module Version1 = {
       | _ => Belt.Result.Error(["Expected an object"])
       }
   and deserialize_Types____person:
-    target => Belt.Result.t(_Types__person, list(string)) =
+    target => result(_Types__person, list(string)) =
     record =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
@@ -538,7 +537,7 @@ module Version1 = {
           let inner = attr_coords => {
             let inner = attr_age => {
               let inner = attr_name =>
-                Belt.Result.Ok(
+                Ok(
                   {
                     name: attr_name,
                     age: attr_age,
@@ -618,12 +617,10 @@ module Version1 = {
                           arg0,
                         )
                       ) {
-                      | Belt.Result.Ok(arg0) => Belt.Result.Ok((arg0, arg1))
-                      | Error(error) =>
-                        Belt.Result.Error(["tuple element 0", ...error])
+                      | Belt.Result.Ok(arg0) => Ok((arg0, arg1))
+                      | Error(error) => Error(["tuple element 0", ...error])
                       }
-                    | Error(error) =>
-                      Belt.Result.Error(["tuple element 1", ...error])
+                    | Error(error) => Error(["tuple element 1", ...error])
                     }
                   | _ => Belt.Result.Error(["Expected an array"])
                   }
@@ -660,12 +657,10 @@ module Version1 = {
                   switch (deserialize_Types____person(arg1)) {
                   | Belt.Result.Ok(arg1) =>
                     switch (deserialize_Types____person(arg0)) {
-                    | Belt.Result.Ok(arg0) => Belt.Result.Ok((arg0, arg1))
-                    | Error(error) =>
-                      Belt.Result.Error(["tuple element 0", ...error])
+                    | Belt.Result.Ok(arg0) => Ok((arg0, arg1))
+                    | Error(error) => Error(["tuple element 0", ...error])
                     }
-                  | Error(error) =>
-                    Belt.Result.Error(["tuple element 1", ...error])
+                  | Error(error) => Error(["tuple element 1", ...error])
                   }
                 | _ => Belt.Result.Error(["Expected an array"])
                 }
@@ -681,31 +676,28 @@ module Version1 = {
         };
       | _ => Belt.Result.Error(["Expected an object"])
       }
-  and deserialize_Types____pet:
-    target => Belt.Result.t(_Types__pet, list(string)) =
+  and deserialize_Types____pet: target => result(_Types__pet, list(string)) =
     constructor =>
       switch (Js.Json.classify(constructor)) {
       | JSONArray([|tag|])
           when Js.Json.JSONString("Dog") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Dog: _Types__pet)
+        Ok(Dog: _Types__pet)
       | JSONArray([|tag|])
           when Js.Json.JSONString("Cat") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Cat: _Types__pet)
-      | _ => Belt.Result.Error(["Expected an array"])
+        Ok(Cat: _Types__pet)
+      | _ => Error(["Expected an array"])
       };
 };
 module Version2 = {
   open Types2;
   let rec deserialize_Types____household:
-    target => Belt.Result.t(_Types__household, list(string)) =
+    target => result(_Types__household, list(string)) =
     record =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
         let inner = attr_pets => {
           let inner = attr_people =>
-            Belt.Result.Ok(
-              {people: attr_people, pets: attr_pets}: _Types__household,
-            );
+            Ok({people: attr_people, pets: attr_pets}: _Types__household);
           switch (Js.Dict.get(dict, "people")) {
           | None => Belt.Result.Error(["No attribute 'people'"])
           | Some(json) =>
@@ -780,7 +772,7 @@ module Version2 = {
       | _ => Belt.Result.Error(["Expected an object"])
       }
   and deserialize_Types____person:
-    target => Belt.Result.t(_Types__person, list(string)) =
+    target => result(_Types__person, list(string)) =
     record =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
@@ -788,7 +780,7 @@ module Version2 = {
           let inner = attr_coords => {
             let inner = attr_age => {
               let inner = attr_name =>
-                Belt.Result.Ok(
+                Ok(
                   {
                     name: attr_name,
                     age: attr_age,
@@ -867,12 +859,10 @@ module Version2 = {
                           arg0,
                         )
                       ) {
-                      | Belt.Result.Ok(arg0) => Belt.Result.Ok((arg0, arg1))
-                      | Error(error) =>
-                        Belt.Result.Error(["tuple element 0", ...error])
+                      | Belt.Result.Ok(arg0) => Ok((arg0, arg1))
+                      | Error(error) => Error(["tuple element 0", ...error])
                       }
-                    | Error(error) =>
-                      Belt.Result.Error(["tuple element 1", ...error])
+                    | Error(error) => Error(["tuple element 1", ...error])
                     }
                   | _ => Belt.Result.Error(["Expected an array"])
                   }
@@ -909,12 +899,10 @@ module Version2 = {
                   switch (deserialize_Types____person(arg1)) {
                   | Belt.Result.Ok(arg1) =>
                     switch (deserialize_Types____person(arg0)) {
-                    | Belt.Result.Ok(arg0) => Belt.Result.Ok((arg0, arg1))
-                    | Error(error) =>
-                      Belt.Result.Error(["tuple element 0", ...error])
+                    | Belt.Result.Ok(arg0) => Ok((arg0, arg1))
+                    | Error(error) => Error(["tuple element 0", ...error])
                     }
-                  | Error(error) =>
-                    Belt.Result.Error(["tuple element 1", ...error])
+                  | Error(error) => Error(["tuple element 1", ...error])
                   }
                 | _ => Belt.Result.Error(["Expected an array"])
                 }
@@ -930,34 +918,31 @@ module Version2 = {
         };
       | _ => Belt.Result.Error(["Expected an object"])
       }
-  and deserialize_Types____pet:
-    target => Belt.Result.t(_Types__pet, list(string)) =
+  and deserialize_Types____pet: target => result(_Types__pet, list(string)) =
     constructor =>
       switch (Js.Json.classify(constructor)) {
       | JSONArray([|tag|])
           when Js.Json.JSONString("Dog") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Dog: _Types__pet)
+        Ok(Dog: _Types__pet)
       | JSONArray([|tag|])
           when Js.Json.JSONString("Cat") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Cat: _Types__pet)
+        Ok(Cat: _Types__pet)
       | JSONArray([|tag|])
           when Js.Json.JSONString("Mouse") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Mouse: _Types__pet)
-      | _ => Belt.Result.Error(["Expected an array"])
+        Ok(Mouse: _Types__pet)
+      | _ => Error(["Expected an array"])
       };
 };
 module Version3 = {
   open Types3;
   let rec deserialize_Types____household:
-    target => Belt.Result.t(_Types__household, list(string)) =
+    target => result(_Types__household, list(string)) =
     record =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
         let inner = attr_pets => {
           let inner = attr_people =>
-            Belt.Result.Ok(
-              {people: attr_people, pets: attr_pets}: _Types__household,
-            );
+            Ok({people: attr_people, pets: attr_pets}: _Types__household);
           switch (Js.Dict.get(dict, "people")) {
           | None => Belt.Result.Error(["No attribute 'people'"])
           | Some(json) =>
@@ -1032,14 +1017,14 @@ module Version3 = {
       | _ => Belt.Result.Error(["Expected an object"])
       }
   and deserialize_Types____person:
-    target => Belt.Result.t(_Types__person, list(string)) =
+    target => result(_Types__person, list(string)) =
     record =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
         let inner = attr_coords => {
           let inner = attr_age => {
             let inner = attr_name =>
-              Belt.Result.Ok(
+              Ok(
                 {name: attr_name, age: attr_age, coords: attr_coords}: _Types__person,
               );
             switch (Js.Dict.get(dict, "name")) {
@@ -1113,12 +1098,10 @@ module Version3 = {
                         arg0,
                       )
                     ) {
-                    | Belt.Result.Ok(arg0) => Belt.Result.Ok((arg0, arg1))
-                    | Error(error) =>
-                      Belt.Result.Error(["tuple element 0", ...error])
+                    | Belt.Result.Ok(arg0) => Ok((arg0, arg1))
+                    | Error(error) => Error(["tuple element 0", ...error])
                     }
-                  | Error(error) =>
-                    Belt.Result.Error(["tuple element 1", ...error])
+                  | Error(error) => Error(["tuple element 1", ...error])
                   }
                 | _ => Belt.Result.Error(["Expected an array"])
                 }
@@ -1133,39 +1116,36 @@ module Version3 = {
         };
       | _ => Belt.Result.Error(["Expected an object"])
       }
-  and deserialize_Types____pet:
-    target => Belt.Result.t(_Types__pet, list(string)) = Version2.deserialize_Types____pet;
+  and deserialize_Types____pet: target => result(_Types__pet, list(string)) = Version2.deserialize_Types____pet;
 };
 module Version4 = {
   open Types4;
   let rec deserialize_Types____dogBreed:
-    target => Belt.Result.t(_Types__dogBreed, list(string)) =
+    target => result(_Types__dogBreed, list(string)) =
     constructor =>
       switch (Js.Json.classify(constructor)) {
       | JSONArray([|tag|])
           when Js.Json.JSONString("Schnouser") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Schnouser: _Types__dogBreed)
+        Ok(Schnouser: _Types__dogBreed)
       | JSONArray([|tag|])
           when Js.Json.JSONString("Lab") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Lab: _Types__dogBreed)
+        Ok(Lab: _Types__dogBreed)
       | JSONArray([|tag|])
           when Js.Json.JSONString("Retriever") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Retriever: _Types__dogBreed)
+        Ok(Retriever: _Types__dogBreed)
       | JSONArray([|tag|])
           when Js.Json.JSONString("Poodle") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Poodle: _Types__dogBreed)
-      | _ => Belt.Result.Error(["Expected an array"])
+        Ok(Poodle: _Types__dogBreed)
+      | _ => Error(["Expected an array"])
       }
   and deserialize_Types____household:
-    target => Belt.Result.t(_Types__household, list(string)) =
+    target => result(_Types__household, list(string)) =
     record =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
         let inner = attr_pets => {
           let inner = attr_people =>
-            Belt.Result.Ok(
-              {people: attr_people, pets: attr_pets}: _Types__household,
-            );
+            Ok({people: attr_people, pets: attr_pets}: _Types__household);
           switch (Js.Dict.get(dict, "people")) {
           | None => Belt.Result.Error(["No attribute 'people'"])
           | Some(json) =>
@@ -1240,9 +1220,8 @@ module Version4 = {
       | _ => Belt.Result.Error(["Expected an object"])
       }
   and deserialize_Types____person:
-    target => Belt.Result.t(_Types__person, list(string)) = Version3.deserialize_Types____person
-  and deserialize_Types____pet:
-    target => Belt.Result.t(_Types__pet, list(string)) =
+    target => result(_Types__person, list(string)) = Version3.deserialize_Types____person
+  and deserialize_Types____pet: target => result(_Types__pet, list(string)) =
     constructor =>
       switch (Js.Json.classify(constructor)) {
       | JSONArray([|tag, arg0|])
@@ -1268,23 +1247,22 @@ module Version4 = {
           )
         ) {
         | Belt.Result.Ok(arg0) =>
-          Belt.Result.Ok([@implicit_arity] Dog(arg0): _Types__pet)
-        | Error(error) =>
-          Belt.Result.Error(["constructor argument 0", ...error])
+          Ok([@implicit_arity] Dog(arg0): _Types__pet)
+        | Error(error) => Error(["constructor argument 0", ...error])
         }
       | JSONArray([|tag|])
           when Js.Json.JSONString("Cat") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Cat: _Types__pet)
+        Ok(Cat: _Types__pet)
       | JSONArray([|tag|])
           when Js.Json.JSONString("Mouse") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Mouse: _Types__pet)
-      | _ => Belt.Result.Error(["Expected an array"])
+        Ok(Mouse: _Types__pet)
+      | _ => Error(["Expected an array"])
       };
 };
 module Version5 = {
   open Types5;
   let rec deserialize_Types____dogBreed:
-    target => Belt.Result.t(_Types__dogBreed, list(string)) =
+    target => result(_Types__dogBreed, list(string)) =
     constructor =>
       switch (Js.Json.classify(constructor)) {
       | JSONArray([|tag, arg0|])
@@ -1301,30 +1279,29 @@ module Version5 = {
           )
         ) {
         | Belt.Result.Ok(arg0) =>
-          Belt.Result.Ok([@implicit_arity] Schnouser(arg0): _Types__dogBreed)
-        | Error(error) =>
-          Belt.Result.Error(["constructor argument 0", ...error])
+          Ok([@implicit_arity] Schnouser(arg0): _Types__dogBreed)
+        | Error(error) => Error(["constructor argument 0", ...error])
         }
       | JSONArray([|tag|])
           when Js.Json.JSONString("Lab") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Lab: _Types__dogBreed)
+        Ok(Lab: _Types__dogBreed)
       | JSONArray([|tag|])
           when Js.Json.JSONString("Retriever") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Retriever: _Types__dogBreed)
+        Ok(Retriever: _Types__dogBreed)
       | JSONArray([|tag|])
           when Js.Json.JSONString("Poodle") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Poodle: _Types__dogBreed)
-      | _ => Belt.Result.Error(["Expected an array"])
+        Ok(Poodle: _Types__dogBreed)
+      | _ => Error(["Expected an array"])
       }
   and deserialize_Types____household:
-    target => Belt.Result.t(_Types__household, list(string)) =
+    target => result(_Types__household, list(string)) =
     record =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
         let inner = attr_county => {
           let inner = attr_pets => {
             let inner = attr_people =>
-              Belt.Result.Ok(
+              Ok(
                 {people: attr_people, pets: attr_pets, county: attr_county}: _Types__household,
               );
             switch (Js.Dict.get(dict, "people")) {
@@ -1423,14 +1400,14 @@ module Version5 = {
       }
   and deserialize_Types____named:
     type arg0.
-      (target => Belt.Result.t(arg0, list(string)), target) =>
-      Belt.Result.t(_Types__named(arg0), list(string)) =
+      (target => result(arg0, list(string)), target) =>
+      result(_Types__named(arg0), list(string)) =
     (aTransformer, record) =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
         let inner = attr_contents => {
           let inner = attr_name =>
-            Belt.Result.Ok(
+            Ok(
               {name: attr_name, contents: attr_contents}:
                                                            _Types__named(
                                                              arg0,
@@ -1468,9 +1445,8 @@ module Version5 = {
       | _ => Belt.Result.Error(["Expected an object"])
       }
   and deserialize_Types____person:
-    target => Belt.Result.t(_Types__person, list(string)) = Version4.deserialize_Types____person
-  and deserialize_Types____pet:
-    target => Belt.Result.t(_Types__pet, list(string)) =
+    target => result(_Types__person, list(string)) = Version4.deserialize_Types____person
+  and deserialize_Types____pet: target => result(_Types__pet, list(string)) =
     constructor =>
       switch (Js.Json.classify(constructor)) {
       | JSONArray([|tag, arg0|])
@@ -1496,23 +1472,22 @@ module Version5 = {
           )
         ) {
         | Belt.Result.Ok(arg0) =>
-          Belt.Result.Ok([@implicit_arity] Dog(arg0): _Types__pet)
-        | Error(error) =>
-          Belt.Result.Error(["constructor argument 0", ...error])
+          Ok([@implicit_arity] Dog(arg0): _Types__pet)
+        | Error(error) => Error(["constructor argument 0", ...error])
         }
       | JSONArray([|tag|])
           when Js.Json.JSONString("Cat") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Cat: _Types__pet)
+        Ok(Cat: _Types__pet)
       | JSONArray([|tag|])
           when Js.Json.JSONString("Mouse") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Mouse: _Types__pet)
-      | _ => Belt.Result.Error(["Expected an array"])
+        Ok(Mouse: _Types__pet)
+      | _ => Error(["Expected an array"])
       };
 };
 module Version6 = {
   open Types6;
   let rec deserialize_Types____household:
-    target => Belt.Result.t(_Types__household, list(string)) =
+    target => result(_Types__household, list(string)) =
     record =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
@@ -1521,7 +1496,7 @@ module Version6 = {
             let inner = attr_what => {
               let inner = attr_pets => {
                 let inner = attr_people =>
-                  Belt.Result.Ok(
+                  Ok(
                     {
                       people: attr_people,
                       pets: attr_pets,
@@ -1685,15 +1660,15 @@ module Version6 = {
       }
   and deserialize_Types____named:
     type arg0.
-      (target => Belt.Result.t(arg0, list(string)), target) =>
-      Belt.Result.t(_Types__named(arg0), list(string)) =
+      (target => result(arg0, list(string)), target) =>
+      result(_Types__named(arg0), list(string)) =
     (aTransformer, record) =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
         let inner = attr_isClosed => {
           let inner = attr_contents => {
             let inner = attr_name =>
-              Belt.Result.Ok(
+              Ok(
                 {
                   name: attr_name,
                   contents: attr_contents,
@@ -1753,43 +1728,41 @@ module Version6 = {
       | _ => Belt.Result.Error(["Expected an object"])
       }
   and deserialize_Types____person:
-    target => Belt.Result.t(_Types__person, list(string)) = Version5.deserialize_Types____person
-  and deserialize_Types____pet:
-    target => Belt.Result.t(_Types__pet, list(string)) =
+    target => result(_Types__person, list(string)) = Version5.deserialize_Types____person
+  and deserialize_Types____pet: target => result(_Types__pet, list(string)) =
     constructor =>
       switch (Js.Json.classify(constructor)) {
       | JSONArray([|tag|])
           when Js.Json.JSONString("a-cat") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Dog: _Types__pet)
+        Ok(Dog: _Types__pet)
       | JSONArray([|tag|])
           when Js.Json.JSONString("Cat") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Cat: _Types__pet)
+        Ok(Cat: _Types__pet)
       | JSONArray([|tag|])
           when Js.Json.JSONString("Mouse") == Js.Json.classify(tag) =>
-        Belt.Result.Ok(Mouse: _Types__pet)
-      | _ => Belt.Result.Error(["Expected an array"])
+        Ok(Mouse: _Types__pet)
+      | _ => Error(["Expected an array"])
       }
   and deserialize_Types____what:
     type arg0.
-      (target => Belt.Result.t(arg0, list(string)), target) =>
-      Belt.Result.t(_Types__what(arg0), list(string)) =
+      (target => result(arg0, list(string)), target) =>
+      result(_Types__what(arg0), list(string)) =
     (aTransformer, constructor) =>
       switch (Js.Json.classify(constructor)) {
       | JSONArray([|tag, arg0|])
           when Js.Json.JSONString("Now") == Js.Json.classify(tag) =>
         switch (aTransformer(arg0)) {
         | Belt.Result.Ok(arg0) =>
-          Belt.Result.Ok([@implicit_arity] Now(arg0): _Types__what(arg0))
-        | Error(error) =>
-          Belt.Result.Error(["constructor argument 0", ...error])
+          Ok([@implicit_arity] Now(arg0): _Types__what(arg0))
+        | Error(error) => Error(["constructor argument 0", ...error])
         }
-      | _ => Belt.Result.Error(["Expected an array"])
+      | _ => Error(["Expected an array"])
       };
 };
 module Version7 = {
   open Types7;
   let rec deserialize_Types____household:
-    target => Belt.Result.t(_Types__household, list(string)) =
+    target => result(_Types__household, list(string)) =
     record =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
@@ -1800,7 +1773,7 @@ module Version7 = {
                 let inner = attr_people => {
                   let inner = attr_two => {
                     let inner = attr_one =>
-                      Belt.Result.Ok(
+                      Ok(
                         {
                           one: attr_one,
                           two: attr_two,
@@ -1994,8 +1967,8 @@ module Version7 = {
       }
   and deserialize_Types____named:
     type arg0.
-      (target => Belt.Result.t(arg0, list(string)), target) =>
-      Belt.Result.t(_Types__named(arg0), list(string)) =
+      (target => result(arg0, list(string)), target) =>
+      result(_Types__named(arg0), list(string)) =
     (aTransformer, record) =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
@@ -2003,7 +1976,7 @@ module Version7 = {
           let inner = attr_isClosed => {
             let inner = attr_contents => {
               let inner = attr_name =>
-                Belt.Result.Ok(
+                Ok(
                   {
                     name: attr_name,
                     contents: attr_contents,
@@ -2092,12 +2065,11 @@ module Version7 = {
         };
       | _ => Belt.Result.Error(["Expected an object"])
       }
-  and deserialize_Types____one:
-    target => Belt.Result.t(_Types__one, list(string)) =
+  and deserialize_Types____one: target => result(_Types__one, list(string)) =
     record =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
-        let inner = attr_key => Belt.Result.Ok({key: attr_key}: _Types__one);
+        let inner = attr_key => Ok({key: attr_key}: _Types__one);
         switch (Js.Dict.get(dict, "key")) {
         | None => Belt.Result.Error(["No attribute 'key'"])
         | Some(json) =>
@@ -2120,7 +2092,7 @@ module Version7 = {
       | _ => Belt.Result.Error(["Expected an object"])
       }
   and deserialize_Types____person:
-    target => Belt.Result.t(_Types__person, list(string)) =
+    target => result(_Types__person, list(string)) =
     record =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
@@ -2128,7 +2100,7 @@ module Version7 = {
           let inner = attr_thing => {
             let inner = attr_age => {
               let inner = attr_name =>
-                Belt.Result.Ok(
+                Ok(
                   {
                     name: attr_name,
                     age: attr_age,
@@ -2185,15 +2157,15 @@ module Version7 = {
                   switch (Js.Json.classify(constructor)) {
                   | JSONArray([|tag|])
                       when Js.Json.JSONString("one") == Js.Json.classify(tag) =>
-                    Belt.Result.Ok(`one)
+                    Ok(`one)
                   | JSONArray([|tag|])
                       when Js.Json.JSONString("two") == Js.Json.classify(tag) =>
-                    Belt.Result.Ok(`two)
+                    Ok(`two)
                   | JSONArray([|tag|])
                       when
                         Js.Json.JSONString("three") == Js.Json.classify(tag) =>
-                    Belt.Result.Ok(`three)
-                  | _ => Belt.Result.Error(["Expected an array"])
+                    Ok(`three)
+                  | _ => Error(["Expected an array"])
                   }
               )(
                 json,
@@ -2236,12 +2208,10 @@ module Version7 = {
                         arg0,
                       )
                     ) {
-                    | Belt.Result.Ok(arg0) => Belt.Result.Ok((arg0, arg1))
-                    | Error(error) =>
-                      Belt.Result.Error(["tuple element 0", ...error])
+                    | Belt.Result.Ok(arg0) => Ok((arg0, arg1))
+                    | Error(error) => Error(["tuple element 0", ...error])
                     }
-                  | Error(error) =>
-                    Belt.Result.Error(["tuple element 1", ...error])
+                  | Error(error) => Error(["tuple element 1", ...error])
                   }
                 | _ => Belt.Result.Error(["Expected an array"])
                 }
@@ -2256,14 +2226,12 @@ module Version7 = {
         };
       | _ => Belt.Result.Error(["Expected an object"])
       }
-  and deserialize_Types____pet:
-    target => Belt.Result.t(_Types__pet, list(string)) = Version6.deserialize_Types____pet
-  and deserialize_Types____two:
-    target => Belt.Result.t(_Types__two, list(string)) =
+  and deserialize_Types____pet: target => result(_Types__pet, list(string)) = Version6.deserialize_Types____pet
+  and deserialize_Types____two: target => result(_Types__two, list(string)) =
     record =>
       switch (Js.Json.classify(record)) {
       | JSONObject(dict) =>
-        let inner = attr_key => Belt.Result.Ok({key: attr_key}: _Types__two);
+        let inner = attr_key => Ok({key: attr_key}: _Types__two);
         switch (Js.Dict.get(dict, "key")) {
         | None => Belt.Result.Error(["No attribute 'key'"])
         | Some(json) =>
@@ -2287,8 +2255,8 @@ module Version7 = {
       }
   and deserialize_Types____what:
     type arg0.
-      (target => Belt.Result.t(arg0, list(string)), target) =>
-      Belt.Result.t(_Types__what(arg0), list(string)) =
+      (target => result(arg0, list(string)), target) =>
+      result(_Types__what(arg0), list(string)) =
     (aTransformer, constructor) =>
       switch (Js.Json.classify(constructor)) {
       | JSONArray([|tag, arg0, arg1|])
@@ -2307,16 +2275,12 @@ module Version7 = {
         | Belt.Result.Ok(arg1) =>
           switch (aTransformer(arg0)) {
           | Belt.Result.Ok(arg0) =>
-            Belt.Result.Ok(
-              [@implicit_arity] Now(arg0, arg1): _Types__what(arg0),
-            )
-          | Error(error) =>
-            Belt.Result.Error(["constructor argument 0", ...error])
+            Ok([@implicit_arity] Now(arg0, arg1): _Types__what(arg0))
+          | Error(error) => Error(["constructor argument 0", ...error])
           }
-        | Error(error) =>
-          Belt.Result.Error(["constructor argument 1", ...error])
+        | Error(error) => Error(["constructor argument 1", ...error])
         }
-      | _ => Belt.Result.Error(["Expected an array"])
+      | _ => Error(["Expected an array"])
       }
   and serialize_Types____household: _Types__household => target =
     record =>
@@ -2487,62 +2451,62 @@ let serializeHousehold = data =>
   )
 and deserializeHousehold = data =>
   switch (parseVersion(data)) {
-  | Belt.Result.Error(err) => Belt.Result.Error([err])
+  | Error(err) => Error([err])
   | [@implicit_arity] Ok(version, data) =>
     switch (version) {
     | 7 =>
       switch (Version7.deserialize_Types____household(data)) {
-      | Belt.Result.Error(error) => Belt.Result.Error(error)
-      | Ok(data) => Belt.Result.Ok(data)
+      | Error(error) => Error(error)
+      | Ok(data) => Ok(data)
       }
     | 6 =>
       switch (Version6.deserialize_Types____household(data)) {
-      | Belt.Result.Error(error) => Belt.Result.Error(error)
+      | Error(error) => Error(error)
       | Ok(data) =>
         let data = Types7.migrate_Types____household(data);
-        Belt.Result.Ok(data);
+        Ok(data);
       }
     | 5 =>
       switch (Version5.deserialize_Types____household(data)) {
-      | Belt.Result.Error(error) => Belt.Result.Error(error)
+      | Error(error) => Error(error)
       | Ok(data) =>
         let data = Types6.migrate_Types____household(data);
         let data = Types7.migrate_Types____household(data);
-        Belt.Result.Ok(data);
+        Ok(data);
       }
     | 4 =>
       switch (Version4.deserialize_Types____household(data)) {
-      | Belt.Result.Error(error) => Belt.Result.Error(error)
+      | Error(error) => Error(error)
       | Ok(data) =>
         let data = Types5.migrate_Types____household(data);
         let data = Types6.migrate_Types____household(data);
         let data = Types7.migrate_Types____household(data);
-        Belt.Result.Ok(data);
+        Ok(data);
       }
     | 3 =>
       switch (Version3.deserialize_Types____household(data)) {
-      | Belt.Result.Error(error) => Belt.Result.Error(error)
+      | Error(error) => Error(error)
       | Ok(data) =>
         let data = Types4.migrate_Types____household(data);
         let data = Types5.migrate_Types____household(data);
         let data = Types6.migrate_Types____household(data);
         let data = Types7.migrate_Types____household(data);
-        Belt.Result.Ok(data);
+        Ok(data);
       }
     | 2 =>
       switch (Version2.deserialize_Types____household(data)) {
-      | Belt.Result.Error(error) => Belt.Result.Error(error)
+      | Error(error) => Error(error)
       | Ok(data) =>
         let data = Types3.migrate_Types____household(data);
         let data = Types4.migrate_Types____household(data);
         let data = Types5.migrate_Types____household(data);
         let data = Types6.migrate_Types____household(data);
         let data = Types7.migrate_Types____household(data);
-        Belt.Result.Ok(data);
+        Ok(data);
       }
     | 1 =>
       switch (Version1.deserialize_Types____household(data)) {
-      | Belt.Result.Error(error) => Belt.Result.Error(error)
+      | Error(error) => Error(error)
       | Ok(data) =>
         let data = Types2.migrate_Types____household(data);
         let data = Types3.migrate_Types____household(data);
@@ -2550,10 +2514,9 @@ and deserializeHousehold = data =>
         let data = Types5.migrate_Types____household(data);
         let data = Types6.migrate_Types____household(data);
         let data = Types7.migrate_Types____household(data);
-        Belt.Result.Ok(data);
+        Ok(data);
       }
-    | _ =>
-      Belt.Result.Error(["Unexpected version " ++ string_of_int(version)])
+    | _ => Error(["Unexpected version " ++ string_of_int(version)])
     }
   };
 module Modules = {

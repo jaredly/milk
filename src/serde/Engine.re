@@ -1,6 +1,7 @@
 
 module type T = {
   let target: Parsetree.core_type;
+  let preamble: Parsetree.structure;
   let declDeserializer:
     (
       ~helpers: option(string),

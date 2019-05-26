@@ -11,6 +11,7 @@ open Helpers;
 // let jsonObject = items => makeJson("Object", Some(makeList(items)));
 // let jsonArray = items => makeJson("Array", Some(items));
 
+let preamble = [];
 let target = [%type: [ `Assoc(list((string, target)))
        | `Bool(bool)
        | `Float(float)

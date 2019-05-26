@@ -47,6 +47,10 @@ let sourceTransformer = (~source, ~transformers, ~input) => {
 };
 
 
+
+let preamble = [%str
+type result('a, 'b) = Belt.Result.t('a, 'b) = Ok('a) | Error('b);
+];
 let target = [%type: Js.Json.t];
 
 let serializeTransformer =
