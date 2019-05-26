@@ -156,17 +156,17 @@ let sourceTransformer = source => switch source {
       (transformer, array) => switch (array) {
         | Json.Array(items) =>
           let rec loop = (collected, items) => switch items {
-            | [] => Belt.Result.Ok(Belt.List.reverse(collected))
+            | [] => Ok(Belt.List.reverse(collected))
             | [one, ...rest] => switch (transformer(one)) {
-              | Belt.Result.Error(error) => Belt.Result.Error(["array element", ...error])
-              | Belt.Result.Ok(value) => loop([value, ...collected], rest)
+              | Error(error) => Error(["array element", ...error])
+              | Ok(value) => loop([value, ...collected], rest)
             }
           };
           switch (loop([], items)) {
-            | Belt.Result.Error(error) => Belt.Result.Error(error)
-            | Belt.Result.Ok(value) => Belt.Result.Ok(Belt.List.toArray(value))
+            | Error(error) => Error(error)
+            | Ok(value) => Ok(Belt.List.toArray(value))
           }
-        | _ => Belt.Result.Error(["expected an array"])
+        | _ => Error(["expected an array"])
       }
     ];
   | Builtin("list") =>
@@ -174,41 +174,41 @@ let sourceTransformer = source => switch source {
       (transformer, list) => switch (list) {
         | Json.Array(items) =>
           let rec loop = (collected, items) => switch items {
-            | [] => Belt.Result.Ok(Belt.List.reverse(collected))
+            | [] => Ok(Belt.List.reverse(collected))
             | [one, ...rest] => switch (transformer(one)) {
-              | Belt.Result.Error(error) => Belt.Result.Error(["list element", ...error])
-              | Belt.Result.Ok(value) => loop([value, ...collected], rest)
+              | Error(error) => Error(["list element", ...error])
+              | Ok(value) => loop([value, ...collected], rest)
             }
           };
           loop([], items)
-        | _ => Belt.Result.Error(["expected an array"])
+        | _ => Error(["expected an array"])
       }
     ];
   | Builtin("string") =>
     [%expr string => switch (string) {
-      | Json.String(string) => Belt.Result.Ok(string)
+      | Json.String(string) => Ok(string)
       | _ => Error(["epected a string"])
     }]
   | Builtin("bool") => [%expr bool => switch (bool) {
-    | Json.True => Belt.Result.Ok(true)
-    | Json.False => Belt.Result.Ok(false)
-    | _ => Belt.Result.Error(["Expected a bool"])
+    | Json.True => Ok(true)
+    | Json.False => Ok(false)
+    | _ => Error(["Expected a bool"])
   }]
   | Builtin("int") =>
     [%expr number => switch (number) {
-      | Json.Number(number) => Belt.Result.Ok(int_of_float(number))
+      | Json.Number(number) => Ok(int_of_float(number))
       | _ => Error(["Expected a float"])
     }]
   | Builtin("float") => [%expr number => switch (number) {
-    | Json.Number(number) => Belt.Result.Ok(number)
+    | Json.Number(number) => Ok(number)
     | _ => Error(["Expected a float"])
   }]
   | Builtin("option") =>
     [%expr (transformer, option) => switch (option) {
-      | Json.Null => Belt.Result.Ok(None)
+      | Json.Null => Ok(None)
       | _ => switch (transformer(option)) {
-        | Belt.Result.Error(error) => Belt.Result.Error(["optional value", ...error])
-        | Belt.Result.Ok(value) => Belt.Result.Ok(Some(value))
+        | Error(error) => Error(["optional value", ...error])
+        | Ok(value) => Ok(Some(value))
       }
     }]
   | Builtin(name) => failer("Builtin: " ++ name)
@@ -227,17 +227,17 @@ let deserializeTransformer = {
   parseVersion: [%expr
     json => switch json {
       | Json.Object(items) => switch (items->Belt.List.getAssoc("$schemaVersion", (==))) {
-        | Some(Json.Number(schemaVersion)) => [@implicit_arity]Belt.Result.Ok((int_of_float(schemaVersion), json))
-        | Some(_) => Belt.Result.Error("Invalid schema version - expected number")
-        | None => Belt.Result.Error("No $schemaVersion")
+        | Some(Json.Number(schemaVersion)) => [@implicit_arity]Ok((int_of_float(schemaVersion), json))
+        | Some(_) => Error("Invalid schema version - expected number")
+        | None => Error("No $schemaVersion")
       }
-      | Json.Array([Json.Number(version), payload]) => [@implicit_arity]Belt.Result.Ok((int_of_float(version), payload))
-      | _ => Belt.Result.Error("Not wrapped in a version")
+      | Json.Array([Json.Number(version), payload]) => [@implicit_arity]Ok((int_of_float(version), payload))
+      | _ => Error("Not wrapped in a version")
     }
   ],
   tuple: (value, patArgs, body) => [%expr json => switch ([%e value]) {
     | Json.Array([%p makePatList(patArgs)]) => [%e body]
-    | _ => Belt.Result.Error(["Expected array"])
+    | _ => Error(["Expected array"])
   }],
   list: (transformer, list) => {
     [%expr
@@ -245,14 +245,14 @@ let deserializeTransformer = {
         | Json.Array(items) =>
           let transformer = [%e transformer];
           let rec loop = (collected, items) => switch items {
-            | [] => Belt.Result.Ok(Belt.List.reverse(collected))
+            | [] => Ok(Belt.List.reverse(collected))
             | [one, ...rest] => switch (transformer(one)) {
-              | Belt.Result.Error(error) => Belt.Result.Error(["list item", ...error])
-              | Belt.Result.Ok(value) => loop([value, ...collected], rest)
+              | Error(error) => Error(["list item", ...error])
+              | Ok(value) => loop([value, ...collected], rest)
             }
           };
           loop([], items)
-        | _ => Belt.Result.Error(["expected an array"])
+        | _ => Error(["expected an array"])
       }
     ];
 
@@ -280,20 +280,20 @@ let deserializeTransformer = {
             inner(None);
           } else {
             %expr
-            Belt.Result.Error([[%e MakeDeserializer.expString("No attribute '" ++ attrName ++ "'")]]);
+            Error([[%e MakeDeserializer.expString("No attribute '" ++ attrName ++ "'")]]);
           }
         | Some(json) =>
           switch ([%e inner](json)) {
-          | Belt.Result.Error(error) =>
-            Belt.Result.Error([[%e MakeDeserializer.expString("attribute '" ++ attrName ++ "'")], ...error])
-          | Belt.Result.Ok(data) => inner(data)
+          | Error(error) =>
+            Error([[%e MakeDeserializer.expString("attribute '" ++ attrName ++ "'")], ...error])
+          | Ok(data) => inner(data)
           }
         };
       };
     });
     [%expr record => switch (record) {
       | Json.Object(items) => [%e body]
-      | _ => Belt.Result.Error(["Expected an object"])
+      | _ => Error(["Expected an object"])
     }]
   },
   variant: (~renames, constructors) => {
@@ -342,7 +342,7 @@ let deserializeTransformer = {
       Exp.match(
         makeIdent(Lident("constructor")),
         cases->Belt.List.concat([
-          Exp.case([%pat? Json.Array([Json.String(tag), ..._])], [%expr Belt.Result.Error(["Invalid constructor: " ++ tag])]),
+          Exp.case([%pat? Json.Array([Json.String(tag), ..._])], [%expr Error(["Invalid constructor: " ++ tag])]),
           Exp.case(Pat.any(), MakeDeserializer.expError("Expected an array"))
         ])
       )

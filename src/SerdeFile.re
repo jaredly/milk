@@ -67,7 +67,7 @@ let makeConverters = (~config, ~state) =>
         let rec loop = current =>
           if (current === target) {
             %expr
-            Belt.Result.Ok(data);
+            Ok(data);
           } else {
             %expr
             {
@@ -113,7 +113,7 @@ let makeConverters = (~config, ~state) =>
             [%expr
               data =>
                 switch (parseVersion(data)) {
-                | Belt.Result.Error(err) => Belt.Result.Error([err])
+                | Error(err) => Error([err])
                 | [@implicit_arity] Ok(version, data) =>
                   %e
                   Ast_helper.Exp.match(
@@ -125,7 +125,7 @@ let makeConverters = (~config, ~state) =>
                             Ast_helper.Exp.case(
                               [%pat? _],
                               [%expr
-                                Belt.Result.Error([
+                                Error([
                                   "Unexpected version " ++ string_of_int(version),
                                 ])
                               ],
@@ -140,7 +140,7 @@ let makeConverters = (~config, ~state) =>
                               switch%expr (
                                 [%e expIdent(Ldot(Lident(versionModuleName(n)), des))](data)
                               ) {
-                              | Belt.Result.Error(error) => Belt.Result.Error(error)
+                              | Error(error) => Error(error)
                               | Ok(data) =>
                                 %e
                                 makeUpgrader(n, config.version)

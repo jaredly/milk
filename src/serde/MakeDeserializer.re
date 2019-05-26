@@ -51,10 +51,10 @@ type transformer('source) = {
 let loc = Location.none;
 
 let makeIdent = lident => Exp.ident(Location.mknoloc(lident));
-let ok = v => [%expr Belt.Result.Ok([%e v])];
+let ok = v => [%expr Ok([%e v])];
 let expString = message => Exp.constant(Pconst_string(message, None));
-let expError = message => [%expr Belt.Result.Error([[%e expString(message)]])];
-let expPassError = text => [%expr Belt.Result.Error([[%e expString(text)], ...error])];
+let expError = message => [%expr Error([[%e expString(message)]])];
+let expPassError = text => [%expr Error([[%e expString(text)], ...error])];
 let patPassError = [%pat? Error(error)];
 
 
@@ -112,8 +112,8 @@ let rec forArgs = (~renames, transformer, args, body, errorName) => {
           | None => ok(Exp.variant(name, None))
           | Some(arg) => {
             [%expr switch ([%e forExpr(~renames, transformer, arg)](arg0)) {
-              | Belt.Result.Ok(arg) => Belt.Result.Ok([%e Exp.variant(name, Some([%expr arg]))])
-              | Error(error) => Belt.Result.Error(error)
+              | Ok(arg) => Ok([%e Exp.variant(name, Some([%expr arg]))])
+              | Error(error) => Error(error)
             }]
           }
         };
@@ -211,7 +211,7 @@ let declInner = (~helpers, ~renames, transformer, typeLident, {variables, body},
 
 let makeResult = t =>
   Typ.constr(
-    Location.mknoloc(Ldot(Ldot(Lident("Belt"), "Result"), "t")),
+    Location.mknoloc(Lident("result")),
     [
       t,
       Typ.constr(

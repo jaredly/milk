@@ -80,7 +80,12 @@ switch (parse(args)) {
       | Some(config) => config
     })
   | (config, opts) =>
-    Util.Log.spamError := opts->Belt.List.has("-v", (==));
+
+if (opts->Belt.List.has("-v", (==))) {
+
+    Util.Log.spamError := true;
+    Util.MerlinFile.debug := true;
+};
     let (json, configPath) = switch config {
       | None =>
         if (Files.exists("types.json")) {

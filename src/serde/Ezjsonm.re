@@ -27,10 +27,10 @@ let sourceTransformer = (~source, ~transformers, ~input) => {
     makeIdent(Lident(MakeSerializer.transformerName(~moduleName, ~modulePath, ~name)))
   | Builtin("array") =>
     [%expr (transformer, array) => `A(
-      Belt.List.fromArray(Belt.Array.map(array, transformer))
+      Array.to_list(Array.map(transformer, array))
     )]
   | Builtin("list") =>
-    [%expr (transformer, list) => `A(Belt.List.map(list, transformer))]
+    [%expr (transformer, list) => `A(List.map(transformer, list))]
   | Builtin("string") => [%expr s => `String(s)]
   | Builtin("bool") => [%expr b => `Bool(b)]
   | Builtin("unit") => [%expr b => `Null]
@@ -83,15 +83,6 @@ let serializeTransformer =
 
 let declSerializer = MakeSerializer.decl(serializeTransformer);
 
-
-
-
-
-
-
-
-
-
 let sourceTransformer = source => switch source {
   | DigTypes.NotFound => failer("Not found")
   | Public((moduleName, modulePath, name)) =>
@@ -101,17 +92,17 @@ let sourceTransformer = source => switch source {
       (transformer, array) => switch (array) {
         | `A(items) =>
           let rec loop = (collected, items) => switch items {
-            | [] => Belt.Result.Ok(Belt.List.reverse(collected))
+            | [] => Ok(List.rev(collected))
             | [one, ...rest] => switch (transformer(one)) {
-              | Belt.Result.Error(error) => Belt.Result.Error(["array element", ...error])
-              | Belt.Result.Ok(value) => loop([value, ...collected], rest)
+              | Error(error) => Error(["array element", ...error])
+              | Ok(value) => loop([value, ...collected], rest)
             }
           };
           switch (loop([], items)) {
-            | Belt.Result.Error(error) => Belt.Result.Error(error)
-            | Belt.Result.Ok(value) => Belt.Result.Ok(Belt.List.toArray(value))
+            | Error(error) => Error(error)
+            | Ok(value) => Ok(Array.of_list(value))
           }
-        | _ => Belt.Result.Error(["expected an array"])
+        | _ => Error(["expected an array"])
       }
     ];
   | Builtin("list") =>
@@ -119,41 +110,41 @@ let sourceTransformer = source => switch source {
       (transformer, list) => switch (list) {
         | `A(items) =>
           let rec loop = (collected, items) => switch items {
-            | [] => Belt.Result.Ok(Belt.List.reverse(collected))
+            | [] => Ok(List.rev(collected))
             | [one, ...rest] => switch (transformer(one)) {
-              | Belt.Result.Error(error) => Belt.Result.Error(["list element", ...error])
-              | Belt.Result.Ok(value) => loop([value, ...collected], rest)
+              | Error(error) => Error(["list element", ...error])
+              | Ok(value) => loop([value, ...collected], rest)
             }
           };
           loop([], items)
-        | _ => Belt.Result.Error(["expected an array"])
+        | _ => Error(["expected an array"])
       }
     ];
   | Builtin("string") =>
     [%expr string => switch (string) {
-      | `String(string) => Belt.Result.Ok(string)
+      | `String(string) => Ok(string)
       | _ => Error(["epected a string"])
     }]
   | Builtin("bool") => [%expr bool => switch (bool) {
-    | `Bool(true) => Belt.Result.Ok(true)
-    | `Bool(false) => Belt.Result.Ok(false)
-    | _ => Belt.Result.Error(["Expected a bool"])
+    | `Bool(true) => Ok(true)
+    | `Bool(false) => Ok(false)
+    | _ => Error(["Expected a bool"])
   }]
   | Builtin("int") =>
     [%expr number => switch (number) {
-      | `Float(number) => Belt.Result.Ok(int_of_float(number))
+      | `Float(number) => Ok(int_of_float(number))
       | _ => Error(["Expected a float"])
     }]
   | Builtin("float") => [%expr number => switch (number) {
-    | `Float(number) => Belt.Result.Ok(number)
+    | `Float(number) => Ok(number)
     | _ => Error(["Expected a float"])
   }]
   | Builtin("option") =>
     [%expr (transformer, option) => switch (option) {
-      | `Null => Belt.Result.Ok(None)
+      | `Null => Ok(None)
       | _ => switch (transformer(option)) {
-        | Belt.Result.Error(error) => Belt.Result.Error(["optional value", ...error])
-        | Belt.Result.Ok(value) => Belt.Result.Ok(Some(value))
+        | Error(error) => Error(["optional value", ...error])
+        | Ok(value) => Ok(Some(value))
       }
     }]
   | Builtin(name) => failer("Builtin: " ++ name)
@@ -173,18 +164,18 @@ let deserializeTransformer = {
   MakeDeserializer.source: sourceTransformer,
   parseVersion: [%expr
     json => switch json {
-      | `O(items) => switch (items->Belt.List.getAssoc("$schemaVersion", (==))) {
-        | Some(`Float(schemaVersion)) => [@implicit_arity]Belt.Result.Ok((int_of_float(schemaVersion), json))
-        | Some(_) => Belt.Result.Error("Invalid schema version - expected number")
-        | None => Belt.Result.Error("No $schemaVersion")
+      | `O(items) => switch (items |> List.assoc("$schemaVersion")) {
+        | exception Not_found => Error("No $schemaVersion")
+        | `Float(schemaVersion) => [@implicit_arity]Ok((int_of_float(schemaVersion), json))
+        | _ => Error("Invalid schema version - expected number")
       }
-      | `A([`Float(version), payload]) => [@implicit_arity]Belt.Result.Ok((int_of_float(version), payload))
-      | _ => Belt.Result.Error("Not wrapped in a version")
+      | `A([`Float(version), payload]) => [@implicit_arity]Ok((int_of_float(version), payload))
+      | _ => Error("Not wrapped in a version")
     }
   ],
   tuple: (value, patArgs, body) => [%expr json => switch ([%e value]) {
     | `A([%p makePatList(patArgs)]) => [%e body]
-    | _ => Belt.Result.Error(["Expected array"])
+    | _ => Error(["Expected array"])
   }],
   list: (transformer, list) => {
     [%expr
@@ -192,14 +183,14 @@ let deserializeTransformer = {
         | `A(items) =>
           let transformer = [%e transformer];
           let rec loop = (collected, items) => switch items {
-            | [] => Belt.Result.Ok(Belt.List.reverse(collected))
+            | [] => Ok(List.rev(collected))
             | [one, ...rest] => switch (transformer(one)) {
-              | Belt.Result.Error(error) => Belt.Result.Error(["list item", ...error])
-              | Belt.Result.Ok(value) => loop([value, ...collected], rest)
+              | Error(error) => Error(["list item", ...error])
+              | Ok(value) => loop([value, ...collected], rest)
             }
           };
           loop([], items)
-        | _ => Belt.Result.Error(["expected an array"])
+        | _ => Error(["expected an array"])
       }
     ];
 
@@ -220,27 +211,27 @@ let deserializeTransformer = {
       let pat = Pat.var(Location.mknoloc("attr_" ++ label));
       {
         let%expr inner = ([%p pat]) => [%e body];
-        switch (Belt.List.getAssoc(items, [%e MakeDeserializer.expString(attrName)], (==))) {
-        | None =>
+        switch (items |> List.assoc([%e MakeDeserializer.expString(attrName)])) {
+        | exception Not_found =>
           if%e (isOptional) {
             %expr
             inner(None);
           } else {
             %expr
-            Belt.Result.Error([[%e MakeDeserializer.expString("No attribute '" ++ attrName ++ "'")]]);
+            Error([[%e MakeDeserializer.expString("No attribute '" ++ attrName ++ "'")]]);
           }
-        | Some(json) =>
+        | json =>
           switch ([%e inner](json)) {
-          | Belt.Result.Error(error) =>
-            Belt.Result.Error([[%e MakeDeserializer.expString("attribute '" ++ attrName ++ "'")], ...error])
-          | Belt.Result.Ok(data) => inner(data)
+          | Error(error) =>
+            Error([[%e MakeDeserializer.expString("attribute '" ++ attrName ++ "'")], ...error])
+          | Ok(data) => inner(data)
           }
         };
       };
     });
     [%expr record => switch (record) {
       | `O(items) => [%e body]
-      | _ => Belt.Result.Error(["Expected an object"])
+      | _ => Error(["Expected an object"])
     }]
   },
   variant: (~renames, constructors) => {
@@ -286,7 +277,7 @@ let deserializeTransformer = {
       Exp.match(
         makeIdent(Lident("constructor")),
         cases->Belt.List.concat([
-          Exp.case([%pat? `A([`String(tag), ..._])], [%expr Belt.Result.Error(["Invalid constructor: " ++ tag])]),
+          Exp.case([%pat? `A([`String(tag), ..._])], [%expr Error(["Invalid constructor: " ++ tag])]),
           Exp.case(Pat.any(), MakeDeserializer.expError("Expected an array"))
         ])
       )

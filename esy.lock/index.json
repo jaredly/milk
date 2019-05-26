@@ -1,5 +1,5 @@
 {
-  "checksum": "eea7ea5c9aa042af96066aa8201a8efd",
+  "checksum": "ed1af3ad059cf6d3ba40e921c33bac44",
   "root": "@jaredly/milk@link-dev:./package.json",
   "node": {
     "rex-json@1.4.0@d41d8cd9": {
@@ -16,14 +16,16 @@
       "dependencies": [],
       "devDependencies": []
     },
-    "reason-language-server@1.0.0@d41d8cd9": {
-      "id": "reason-language-server@1.0.0@d41d8cd9",
+    "reason-language-server@github:jaredly/reason-language-server#35e42c090d1ab733bb73391f2c48d77d0f3ae4ac@d41d8cd9": {
+      "id":
+        "reason-language-server@github:jaredly/reason-language-server#35e42c090d1ab733bb73391f2c48d77d0f3ae4ac@d41d8cd9",
       "name": "reason-language-server",
-      "version": "1.0.0",
+      "version":
+        "github:jaredly/reason-language-server#35e42c090d1ab733bb73391f2c48d77d0f3ae4ac",
       "source": {
         "type": "install",
         "source": [
-          "archive:https://registry.npmjs.org/reason-language-server/-/reason-language-server-1.0.0.tgz#sha1:afb132a0c8708685dac57398e14c5b88d953e9f8"
+          "github:jaredly/reason-language-server#35e42c090d1ab733bb73391f2c48d77d0f3ae4ac"
         ]
       },
       "overrides": [],
@@ -556,7 +558,8 @@
       },
       "overrides": [],
       "dependencies": [
-        "rex-json@1.4.0@d41d8cd9", "reason-language-server@1.0.0@d41d8cd9",
+        "rex-json@1.4.0@d41d8cd9",
+        "reason-language-server@github:jaredly/reason-language-server#35e42c090d1ab733bb73391f2c48d77d0f3ae4ac@d41d8cd9",
         "ocaml@4.7.1004@d41d8cd9", "@opam/ppxlib@opam:0.6.0@3500c1bb",
         "@opam/ppx_tools_versioned@opam:5.2.2@34409c89",
         "@opam/ppx_tools@opam:5.1+4.06.0@a9357225",
