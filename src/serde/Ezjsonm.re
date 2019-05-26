@@ -55,7 +55,7 @@ let serializeTransformer =
       (version, payload) =>
         switch (payload) {
         | `O(items) =>
-          `O([("$schemaVersion", `Float(float_of_int(version))), ...items])
+          `O([(schemaPropertyName, `Float(float_of_int(version))), ...items])
         | _ => `A([`Float(float_of_int(version)), payload])
         }
     ],
@@ -166,10 +166,10 @@ let deserializeTransformer = {
   MakeDeserializer.source: sourceTransformer,
   parseVersion: [%expr
     json => switch json {
-      | `O(items) => switch (items |> List.assoc("$schemaVersion")) {
-        | exception Not_found => Error("No $schemaVersion")
+      | `O(items) => switch (items |> List.assoc(schemaPropertyName)) {
+        | exception Not_found => Error("No " ++ schemaPropertyName)
         | `Float(schemaVersion) => [@implicit_arity]Ok((int_of_float(schemaVersion), json))
-        | _ => Error("Invalid schema version - expected number")
+        | _ => Error("Invalid " ++ schemaPropertyName ++ " - expected number")
       }
       | `A([`Float(version), payload]) => [@implicit_arity]Ok((int_of_float(version), payload))
       | _ => Error("Not wrapped in a version")

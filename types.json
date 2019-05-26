@@ -1,6 +1,5 @@
 {
-  "$schemaVersion": 2,
-  "version": 2,
+  "version": 1,
   "engines": {
     "rex-json": {
       "output": "src/type-map-serde/Serde.re",
@@ -51,5 +50,6 @@
       "path": [],
       "name": "pattern"
     }
-  ]
+  ],
+  "milkSchemaVersion": 1
 }

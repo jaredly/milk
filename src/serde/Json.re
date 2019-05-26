@@ -78,7 +78,7 @@ let serializeTransformer =
       (version, payload) =>
         switch (payload) {
         | Json.Object(items) =>
-          Json.Object([("$schemaVersion", Json.Number(float_of_int(version))), ...items])
+          Json.Object([(schemaPropertyName, Json.Number(float_of_int(version))), ...items])
         | _ => Json.Array([Json.Number(float_of_int(version)), payload])
         }
     ],
@@ -227,10 +227,10 @@ let deserializeTransformer = {
   MakeDeserializer.source: sourceTransformer,
   parseVersion: [%expr
     json => switch json {
-      | Json.Object(items) => switch (items->Belt.List.getAssoc("$schemaVersion", (==))) {
+      | Json.Object(items) => switch (items->Belt.List.getAssoc(schemaPropertyName, (==))) {
         | Some(Json.Number(schemaVersion)) => [@implicit_arity]Ok((int_of_float(schemaVersion), json))
         | Some(_) => Error("Invalid schema version - expected number")
-        | None => Error("No $schemaVersion")
+        | None => Error("No " ++ schemaPropertyName)
       }
       | Json.Array([Json.Number(version), payload]) => [@implicit_arity]Ok((int_of_float(version), payload))
       | _ => Error("Not wrapped in a version")

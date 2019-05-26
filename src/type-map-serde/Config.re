@@ -93,15 +93,9 @@ let engineConfigs = engines => {
 
 let activeEngines = engines => engineConfigs(engines)->Belt.List.map(fst);
 
-[@migrate.engines ({engine, output}) => switch engine {
-  | Rex_json => {bs_json: None, rex_json: Some({output, helpers: None, options: None}), ezjsonm: None, yojson: None}
-  | Bs_json => {rex_json: None, bs_json: Some({output, helpers: None, options: None}), ezjsonm: None, yojson: None}
-}]
-[@migrate.globalEngines t => None]
-[@migrate.lockedTypes t => None]
-[@migrate.minVersion t => None]
 type t = {
   version: int,
+  schemaPropertyName: option(string),
   // TODO: support this attribute
   minVersion: option(int),
   lockedTypes: option(string),
@@ -113,6 +107,7 @@ type t = {
 
 let empty = {
   version: 1,
+  schemaPropertyName: None,
   minVersion: None,
   lockedTypes: None,
   engines: {

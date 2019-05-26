@@ -203,6 +203,10 @@ let main = (~upvert=false, ~override=false, ~json, configPath) => {
     open Parsetree;
     [%str
       type target = [%t Engine.target];
+      let schemaPropertyName = [%e switch (config.schemaPropertyName) {
+        | None => [%expr "$schemaVersion"]
+        | Some(name) => Ast_helper.Exp.constant(Pconst_string(name, None))
+      }];
     ] @
     Engine.preamble @
     loop(1) @ (

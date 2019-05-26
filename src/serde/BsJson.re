@@ -59,7 +59,7 @@ let serializeTransformer =
       (version, payload) => {
         switch (Js.Json.classify(payload)) {
         | JSONObject(dict) =>
-          Js.Dict.set(dict, "$schemaVersion", Js.Json.number(float_of_int(version)));
+          Js.Dict.set(dict, schemaPropertyName, Js.Json.number(float_of_int(version)));
           Js.Json.object_(dict);
         | _ => Js.Json.array([|Js.Json.number(float_of_int(version)), payload|])
         };
@@ -173,12 +173,12 @@ let deserializeTransformer = {
   MakeDeserializer.source: sourceTransformer,
   parseVersion: [%expr 
     json => switch (Js.Json.classify(json)) {
-      | JSONObject(dict) => switch (Js.Dict.get(dict, "$schemaVersion")) {
+      | JSONObject(dict) => switch (Js.Dict.get(dict, schemaPropertyName)) {
         | Some(schemaVersion) => switch (Js.Json.classify(schemaVersion)) {
         | JSONNumber(version) => [@implicit_arity]Belt.Result.Ok((int_of_float(version), json))
-        | _ => Belt.Result.Error("Invalid $schemaVersion")
+        | _ => Belt.Result.Error("Invalid " ++ schemaPropertyName)
         }
-        | None => Belt.Result.Error("No $schemaVersion present")
+        | None => Belt.Result.Error("No " ++ schemaPropertyName ++ " present")
       }
       | JSONArray([|version, payload|]) => switch (Js.Json.classify(version)) {
         | JSONNumber(version) => [@implicit_arity]Belt.Result.Ok((int_of_float(version), payload))
