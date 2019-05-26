@@ -55,7 +55,7 @@ let serializeTransformer =
       (version, payload) =>
         switch (payload) {
         | `Assoc(items) =>
-          `Assoc([(schemaPropertyName, `Float(float_of_int(version))), ...items])
+          `Assoc(items @ [(schemaPropertyName, `Float(float_of_int(version)))])
         | _ => `List([`Float(float_of_int(version)), payload])
         }
     ],

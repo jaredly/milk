@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "schemaPropertyName": "milkSchemaVersion",
   "engines": {
     "rex-json": {
       "output": "src/type-map-serde/Serde.re",

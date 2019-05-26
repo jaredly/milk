@@ -55,7 +55,7 @@ let serializeTransformer =
       (version, payload) =>
         switch (payload) {
         | `O(items) =>
-          `O([(schemaPropertyName, `Float(float_of_int(version))), ...items])
+          `O(items @ [(schemaPropertyName, `Float(float_of_int(version)))])
         | _ => `A([`Float(float_of_int(version)), payload])
         }
     ],

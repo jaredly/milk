@@ -169,7 +169,7 @@ module Types1 = {
 };
 let currentVersion = 1;
 type target = Json.t;
-let schemaPropertyName = "$schemaVersion";
+let schemaPropertyName = "milkSchemaVersion";
 module Version1 = {
   open Types1;
   let rec deserialize_Analyze__TopTypes____moduleName:
