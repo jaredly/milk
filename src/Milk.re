@@ -231,7 +231,7 @@ let main = (~upvert=false, ~override=false, ~json, configPath) => {
         ]
       ],
     ];
-  let warning = Parsetree.[[%stri [@ocaml.warning "-34"]]]
+  let warning = Parsetree.[[%stri [@ocaml.warning "-34-39"]]]
 
   switch (engines, config.lockedTypes) {
     | ([(engine, {output, helpers})], None) =>

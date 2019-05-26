@@ -69,7 +69,7 @@ let rec forArgs = (~renames, transformer, args, body, errorName) => {
       Exp.apply(forExpr(~renames, transformer, arg), [(Nolabel, makeIdent(Lident(argname)))]),
       [
         Exp.case(
-          Pat.construct(Location.mknoloc(Ldot(Ldot(Lident("Belt"), "Result"), "Ok")), Some(Pat.var(Location.mknoloc(argname)))),
+          Pat.construct(Location.mknoloc(Lident("Ok")), Some(Pat.var(Location.mknoloc(argname)))),
           body
         ),
         Exp.case(
