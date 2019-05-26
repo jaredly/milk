@@ -3068,10 +3068,9 @@ let parseVersion = json =>
 let wrapWithVersion = (version, payload) =>
   switch (payload) {
   | Json.Object(items) =>
-    Json.Object([
-      (schemaPropertyName, Json.Number(float_of_int(version))),
-      ...items,
-    ])
+    Json.Object(
+      items @ [(schemaPropertyName, Json.Number(float_of_int(version)))],
+    )
   | _ => Json.Array([Json.Number(float_of_int(version)), payload])
   };
 let serializeSerializableLockfile = data =>
