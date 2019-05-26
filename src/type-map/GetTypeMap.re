@@ -66,7 +66,7 @@ let mapSource = (~env, ~getModule, path) => {
       }
     }
     | Some(({name, modulePath} as declared, env)) =>
-      let%opt_force ((uri, moduleName), path) = Query.showVisibilityPath(~env, ~getModule, modulePath);
+      let%try_force ((uri, moduleName), path) = Query.showVisibilityPath(~env, ~getModule, modulePath) |> RResult.orError("No visibility path");
       Public({
         uri,
         moduleName,
@@ -132,7 +132,7 @@ let fileToReference = (~state, uri, fullName) => {
     let%opt path = Utils.parseUri(uri);
     package.nameForPath->Query.hashFind(path);
   };
-  let%opt_force moduleName = getModuleName(uri);
+  let%try_force moduleName = getModuleName(uri) |> RResult.orError("File to reference " ++ uri);
   Ok((moduleName, path, name))
 };
 
@@ -156,7 +156,19 @@ let forInitialType = (~tbl, ~state, uri, fullName) => {
     let%opt path = Utils.parseUri(uri);
     package.nameForPath->Query.hashFind(path);
   };
-  let%opt_force moduleName = getModuleName(uri);
+  let moduleName = switch (getModuleName(uri)) {
+    | None =>
+      print_endline("Paths");
+      package.nameForPath |> Hashtbl.iter((k, v) => {
+        print_endline(k);
+      });
+      package.pathsForModule |> Hashtbl.iter((moduleName, paths) => {
+        print_endline(moduleName)
+      });
+      raise(Failure("Entry file " ++ uri ++ " not processed / found"))
+    | Some(moduleName) => moduleName
+  };
+  // let%try_force moduleName = getModuleName(uri) |> RResult.orError("For initial type, no module name " ++ uri);
   let set = Hashtbl.create(10);
   Hashtbl.iter((k, _) => Hashtbl.replace(set, k, ()), tbl);
   ignore(

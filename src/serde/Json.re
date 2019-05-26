@@ -89,7 +89,6 @@ let serializeTransformer =
       // jsonObject(
         let items = items->Belt.List.map(((label, expr, isOptional)) =>
         (
-
           Exp.tuple([
             Exp.constant(Pconst_string(MakeDeserializer.getRename(~renames, label), None)),
             expr,

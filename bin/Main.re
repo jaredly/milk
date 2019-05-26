@@ -80,6 +80,7 @@ switch (parse(args)) {
       | Some(config) => config
     })
   | (config, opts) =>
+    Util.Log.spamError := opts->Belt.List.has("-v", (==));
     let (json, configPath) = switch config {
       | None =>
         if (Files.exists("types.json")) {

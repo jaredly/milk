@@ -112,7 +112,7 @@ type t = {
 };
 
 let empty = {
-  version: 0,
+  version: 1,
   minVersion: None,
   lockedTypes: None,
   engines: {
