@@ -1,0 +1,44 @@
+# Starter pipeline for esy-based projects
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+name: $(Build.SourceVersion)
+jobs:
+- job: Linux
+  timeoutInMinutes: 0
+  pool:
+    vmImage: 'Ubuntu 16.04'
+  steps:
+  - template: esy-build-steps.yml
+
+- job: MacOS
+  timeoutInMinutes: 0
+  pool:
+    vmImage: 'macOS 10.13'
+  steps:
+  - template: esy-build-steps.yml
+
+- job: Windows
+  timeoutInMinutes: 0
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - template: esy-build-steps.yml
+
+- job: Release
+  displayName: Release
+  dependsOn:
+      - Linux
+      - MacOS
+      - Windows
+  condition: succeeded()
+  timeoutInMinutes: 0
+  pool:
+     vmImage: ubuntu-16.04
+  steps:
+    - task: PublishBuildArtifacts@1
+      displayName: 'Release Package'
+      inputs:
+          PathtoPublish: '.'
+          ArtifactName: npm-package
