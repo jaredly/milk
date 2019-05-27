@@ -12,6 +12,7 @@ jobs:
   steps:
   - template: .ci/esy-build-steps.yml
 
+
 - job: MacOS
   timeoutInMinutes: 0
   pool:
@@ -40,5 +41,5 @@ jobs:
     - task: PublishBuildArtifacts@1
       displayName: 'Release Package'
       inputs:
-          PathtoPublish: '.'
+          PathtoPublish: '_build/install/default/bin/milk'
           ArtifactName: npm-package
