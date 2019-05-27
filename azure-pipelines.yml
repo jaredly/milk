@@ -10,21 +10,21 @@ jobs:
   pool:
     vmImage: 'Ubuntu 16.04'
   steps:
-  - template: esy-build-steps.yml
+  - template: .ci/esy-build-steps.yml
 
 - job: MacOS
   timeoutInMinutes: 0
   pool:
     vmImage: 'macOS 10.13'
   steps:
-  - template: esy-build-steps.yml
+  - template: .ci/esy-build-steps.yml
 
 - job: Windows
   timeoutInMinutes: 0
   pool:
     vmImage: 'vs2017-win2016'
   steps:
-  - template: esy-build-steps.yml
+  - template: .ci/esy-build-steps.yml
 
 - job: Release
   displayName: Release
