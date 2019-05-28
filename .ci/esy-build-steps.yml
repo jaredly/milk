@@ -13,8 +13,19 @@ steps:
   - bash: cp _build/default/bin/Main.exe milk-release/milk.exe
   - bash: chmod +x milk-release/milk.exe
   - bash: zip -r milk-release-$(Agent.OS)-$(Build.SourceVersion).zip milk-release
+    condition: and(succeeded(), ne(variables['Agent.OS'], 'Windows_NT'))
 
   - task: PublishBuildArtifacts@1
+    condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'))
+    displayName: 'Upload windows binary'
+    inputs:
+        pathToPublish: 'milk-release'
+        artifactName: 'milk-$(Agent.OS)-$(Build.SourceVersion)'
+        parallel: true
+        parallelCount: 8
+
+  - task: PublishBuildArtifacts@1
+    condition: and(succeeded(), ne(variables['Agent.OS'], 'Windows_NT'))
     displayName: 'Upload binary'
     inputs:
         pathToPublish: 'milk-release-$(Agent.OS)-$(Build.SourceVersion).zip'
