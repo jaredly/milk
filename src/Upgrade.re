@@ -288,7 +288,7 @@ let makeUpgrader = (version, _prevTypeMap, lockedDeep, ~moduleName, ~modulePath,
               ~modulePath,
             )
           ) {
-          | None => failwith("Must provide migrater. Cannot migrate automatically: " ++ name)
+          | None => failwith("Must provide migrator. Cannot migrate automatically: " ++ name)
           | Some(expr) => expr
           };
         };
