@@ -12,11 +12,12 @@ steps:
   - bash: mkdir -p milk-release
   - bash: cp _build/default/bin/Main.exe milk-release/milk.exe
   - bash: chmod +x milk-release/milk.exe
+  - bash: zip -r release.zip milk-release
 
   - task: PublishBuildArtifacts@1
     displayName: 'Upload binary'
     inputs:
-        pathToPublish: './milk-release'
+        pathToPublish: 'release.zip'
         artifactName: 'milk-$(Agent.OS)-$(Build.SourceVersion)'
         parallel: true
         parallelCount: 8
