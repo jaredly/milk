@@ -9,3 +9,13 @@ steps:
     displayName: 'esy build'
   # Run tests or any additional steps here
   # - script: esy b dune runtest
+  - bash: mkdir -p milk-release
+  - bash: cp _build/default/bin/Main.exe milk-release/milk.exe
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Upload binary'
+    inputs:
+        pathToPublish: './milk-release'
+        artifactName: 'milk-$(Agent.OS)-binary'
+        parallel: true
+        parallelCount: 8
