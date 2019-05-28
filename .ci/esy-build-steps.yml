@@ -11,11 +11,12 @@ steps:
   # - script: esy b dune runtest
   - bash: mkdir -p milk-release
   - bash: cp _build/default/bin/Main.exe milk-release/milk.exe
+  - bash: chmod +x milk-release/milk.exe
 
   - task: PublishBuildArtifacts@1
     displayName: 'Upload binary'
     inputs:
         pathToPublish: './milk-release'
-        artifactName: 'milk-$(Agent.OS)-binary'
+        artifactName: 'milk-$(Agent.OS)-$(Build.SourceVersion)'
         parallel: true
         parallelCount: 8
