@@ -59,10 +59,10 @@ let rec migrateExpr = (variable, expr) => {
     ))
   | Reference(Builtin("list"), [arg]) =>
     let%opt converter = migrateExpr([%expr _item], arg);
-    Some([%expr [%e variable]->Belt.List.map(_item => [%e converter])]);
+    Some([%expr [%e variable] |> List.map(_item => [%e converter])]);
   | Reference(Builtin("array"), [arg]) =>
     let%opt converter = migrateExpr([%expr _item], arg);
-    Some([%expr [%e variable]->Belt.Array.map(_item => [%e converter])]);
+    Some([%expr [%e variable] |> Array.map(_item => [%e converter])]);
   | Reference(Builtin("option"), [arg]) =>
     let%opt converter = migrateExpr([%expr _item], arg);
     Some([%expr switch ([%e variable]) {
