@@ -205,7 +205,7 @@ let makeUpgrader = (version, _prevTypeMap, lockedDeep, ~moduleName, ~modulePath,
   let boundName = migrateName(~moduleName, ~modulePath, ~name);
 
   let migrateAttribute = attributes |> Util.Utils.find((({Asttypes.txt}, payload)) => {
-    if (txt == "migrate") {
+    if (txt == "migrate" || txt == "milk.migrate") {
       switch (getExpr(payload)) {
         | Some(expr) =>
         // print_endline("Have migrate attr");
@@ -222,7 +222,9 @@ let makeUpgrader = (version, _prevTypeMap, lockedDeep, ~moduleName, ~modulePath,
 
   let namedMigrateAttributes = attributes->Belt.List.keepMap((({Asttypes.txt}, payload)) => {
     switch (Util.Utils.split_on_char('.', txt)) {
+      | ["milk", "migrate"]
       | ["migrate"] => None
+      | ["milk", "migrate", something]
       | ["migrate", something] => {
         /* print_endline("migrate -- " ++ something) */
         switch (getExpr(payload)) {
@@ -230,6 +232,7 @@ let makeUpgrader = (version, _prevTypeMap, lockedDeep, ~moduleName, ~modulePath,
           | Some(expr) => Some((something, expr))
         }
       }
+      | ["milk", "migrate", ..._]
       | ["migrate", ..._] => {
         print_endline("Warning: invalid migrate specifier " ++ txt);
         None
