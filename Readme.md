@@ -32,7 +32,7 @@ This goes either in a separate JSON file (e.g. `types.json`), or in a `"milk"` s
 
 ```
 {
-  "$schemaVersion": 2,
+  "milkSchemaVersion": 2,
   "version": 1,
   "engines": {
     "bs.json": {
@@ -57,7 +57,7 @@ See the `types.json` in this repo for another example, or [this one over here](h
 
 #### Full spec:
 
-- `$schemaVersion: int` this is the milk config file schema version. The latest version is `2` (the one documented here).
+- `milkSchemaVersion: int` this is the milk config file schema version. The latest version is `2` (the one documented here).
 - `version: int` : this is the version of your types. When you serialize anything, it will have this version attached to it, so that the data can be deserialized in the future & migrated through any subsequent versions. When you make a "breaking change" (see below for details), you'll need to increment this version number, and provide any necessary migrator functions (see below for migration details).
 - `lockedTypes: string` : If you have multiple engines defined, then this is required, otherwise it's optional. This file is where all of the types for all of the versions that exist in your lockfile will be generated, for use by deserialization and migration functions.
 - `engines: {[key: engine_name]: engineConfig}` : a mapping of `engine_name` to `engineConfig`, where `engine_name` is one of `rex_json`, `bs_json`, `ezjsonm`, and `yojson`.
