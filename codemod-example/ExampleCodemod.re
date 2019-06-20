@@ -30,19 +30,18 @@ let replaceErrors = (ctx, expr) =>
     });
 
 let modify = (ctx, structure) => {
+  print_endline("ok");
   structure->strExpr((_mapper, expr) =>
       expr->mapFnExpr((_mapper, args, body) => {
           switch (ctx->getExprType(body)) {
             /* The type Belt.Result.t is just an alias for Belt_Result.t, and we have to specify the "original declaration" path */
           | Reference(Public({moduleName: "Lib__Util", modulePath: ["Belt_Result"], name: "t"}), [Reference(Builtin("int"), []), Reference(Builtin("string"), [])]) =>
             Some((args, ctx->replaceErrors(body)))
-          | Reference(Public({moduleName: something, modulePath: ["Belt_Result"], name: "t"}), [Reference(Builtin("int"), []), Reference(Builtin("string"), [])]) =>
-            None
-            // print_endline(something);
-            // Some((args, ctx->replaceErrors(body)))
+          // | Reference(Public({moduleName: something, modulePath: ["Belt_Result"], name: "t"}), [Reference(Builtin("int"), []), Reference(Builtin("string"), [])]) =>
+          //   print_endline(something);
+          //   None
           | _ =>
             None
-            // Some((args, ctx->replaceErrors(body)))
           };
         })
       ->Some
