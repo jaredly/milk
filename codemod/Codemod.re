@@ -2,26 +2,30 @@
 module Helpers = Helpers;
 
 let run = (~rootPath, ~filterPath, modify) => {
-  let root = Utils.startsWith(rootPath, ".") ? Filename.concat(Sys.getcwd(), rootPath) : rootPath;
+  let mainFile = Utils.startsWith(rootPath, ".") ? Filename.concat(Sys.getcwd(), rootPath) : rootPath;
+  let mainFileUri = Util.Utils.toUri(mainFile);
   let state = Analyze.TopTypes.empty();
   let state = {...state, settings: {...state.settings,
     recordAllLocations: true,
     autoRebuild: false,
   }};
   print_endline("Setting up a package");
-  let%try_force package = Analyze.Packages.newPackageForRoot(~reportDiagnostics=(_, _) => (), state, root);
-  let%opt_force (buildCommand, _) = package.buildCommand;
-  print_endline("Running build command (for freshness) " ++ buildCommand);
-  let (stdout, stderr, success) = Commands.execFull(~pwd=root, buildCommand);
-  if (!success) {
-    print_endline(Utils.joinLines(stdout));
-    print_endline(Utils.joinLines(stderr));
-    failwith("Build command " ++ buildCommand ++ " failed")
-  };
-  if (Utils.joinLines(stderr) |> String.trim != "") {
-    print_endline(Utils.joinLines(stderr));
-    failwith("Build command had stderror " ++ buildCommand)
-  };
+  // let%try_force package = Analyze.Packages.newPackageForRoot(~reportDiagnostics=(_, _) => (), state, root);
+  let%try_force package = Analyze.Packages.getPackage(~reportDiagnostics=(_, _) => (), mainFileUri, state);
+
+  // let%opt_force (buildCommand, _) = package.buildCommand;
+  // print_endline("Running build command (for freshness) " ++ buildCommand);
+  // let (stdout, stderr, success) = Commands.execFull(~pwd=root, buildCommand);
+
+  // if (!success) {
+  //   print_endline(Utils.joinLines(stdout));
+  //   print_endline(Utils.joinLines(stderr));
+  //   failwith("Build command " ++ buildCommand ++ " failed")
+  // };
+  // if (Utils.joinLines(stderr) |> String.trim != "") {
+  //   print_endline(Utils.joinLines(stderr));
+  //   failwith("Build command had stderror " ++ buildCommand)
+  // };
 
   let fullForCmt = (switch (package.compilerVersion) {
     | Analyze.BuildSystem.V402 => Process_402.fullForCmt
@@ -35,7 +39,7 @@ let run = (~rootPath, ~filterPath, modify) => {
   package.Analyze.TopTypes.localModules->Belt.List.forEach(moduleName => {
     let%opt_force paths = Utils.maybeHash(package.pathsForModule, moduleName);
     let%opt_consume (cmt, src) = SharedTypes.getImpl(paths);
-    print_endline(src);
+    print_endline("Analyzing: " ++ src);
 
     if (filterPath(src, moduleName)) {
       let%try_force full = fullForCmt(~moduleName, cmt, src, x => x);
