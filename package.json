@@ -30,8 +30,5 @@
     "rex-json": "*",
     "reason-language-server": "jaredly/reason-language-server",
     "ocaml": "~4.7.2"
-  },
-  "resolutions": {
-    "reason-language-server": "link:../reason-language-server"
   }
 }
