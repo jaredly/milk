@@ -138,6 +138,37 @@ type animal = Dog(string) | Cat | Mouse;
 type animal = Dog(string, option(int)) | Cat;
 ```
 
+### Abstract Types
+
+For abstract types that you want to support, add manual serialization and deserialization functions.
+
+Make sure to list the module that provides the serialize and deserialize functions in  the `"helpers"` section of your `types.json` file:
+
+```diff
+   "version": 1,
+   "engines": {
+     "Js.Json": {
+-      "output": "src/TypesEncoder.re"
++      "output": "src/TypesEncoder.re",
++      "helpers": "EncoderHelpers"
+     }
+   },
+   "entries": [
+```
+
+Then define the serialize and deserialize functions. Here is an example of the function signatures to support a `StringMap.t('a)`:
+
+```reasonml
+/* EncoderHelpers.re */
+let serialize_StringMap____t = map => /* ... */
+let deserialize_StringMap____t = json => /* ... */
+let deserialize_StringMap____t = (migrator, json) => /* ... */
+```
+
+Here are some real-world examples:
+- [`types.json`](https://github.com/jaredly/veoluz/blob/master/types.json#L6)
+- [`helpers`](https://github.com/jaredly/veoluz/blob/master/ui/TypeHelpers.re)
+
 ## What type changes are "compatible"
 (e.g. don't require a version bump)
 
