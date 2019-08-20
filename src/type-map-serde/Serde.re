@@ -213,6 +213,7 @@ module Version1 = {
         };
       | _ => Error(["Expected an object"])
       }
+
   and deserialize_Location____t: target => result(_Location__t, list(string)) =
     record =>
       switch (record) {
@@ -332,20 +333,17 @@ module Version1 = {
       switch (constructor) {
       | Json.Array([Json.String(tag), arg0]) when "PStr" == tag =>
         switch (deserialize_Parsetree____structure(arg0)) {
-        | Belt.Result.Ok(arg0) =>
-          Ok([@implicit_arity] PStr(arg0): _Parsetree__payload)
+        | Belt.Result.Ok(arg0) => Ok(PStr(arg0): _Parsetree__payload)
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag), arg0]) when "PSig" == tag =>
         switch (deserialize_Parsetree____signature(arg0)) {
-        | Belt.Result.Ok(arg0) =>
-          Ok([@implicit_arity] PSig(arg0): _Parsetree__payload)
+        | Belt.Result.Ok(arg0) => Ok(PSig(arg0): _Parsetree__payload)
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag), arg0]) when "PTyp" == tag =>
         switch (deserialize_Parsetree____core_type(arg0)) {
-        | Belt.Result.Ok(arg0) =>
-          Ok([@implicit_arity] PTyp(arg0): _Parsetree__payload)
+        | Belt.Result.Ok(arg0) => Ok(PTyp(arg0): _Parsetree__payload)
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag), arg0, arg1]) when "PPat" == tag =>
@@ -403,12 +401,7 @@ module Version1 = {
           )
         ) {
         | Belt.Result.Ok(arg0) =>
-          Ok(
-            [@implicit_arity] Expr(arg0):
-                                           _SharedTypes__SimpleType__body(
-                                             arg0,
-                                           ),
-          )
+          Ok(Expr(arg0): _SharedTypes__SimpleType__body(arg0))
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag), arg0]) when "Record" == tag =>
@@ -465,12 +458,7 @@ module Version1 = {
           )
         ) {
         | Belt.Result.Ok(arg0) =>
-          Ok(
-            [@implicit_arity] Record(arg0):
-                                             _SharedTypes__SimpleType__body(
-                                               arg0,
-                                             ),
-          )
+          Ok(Record(arg0): _SharedTypes__SimpleType__body(arg0))
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag), arg0]) when "Variant" == tag =>
@@ -571,18 +559,14 @@ module Version1 = {
           )
         ) {
         | Belt.Result.Ok(arg0) =>
-          Ok(
-            [@implicit_arity] Variant(arg0):
-                                              _SharedTypes__SimpleType__body(
-                                                arg0,
-                                              ),
-          )
+          Ok(Variant(arg0): _SharedTypes__SimpleType__body(arg0))
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag), ..._]) =>
         Error(["Invalid constructor: " ++ tag])
       | _ => Error(["Expected an array"])
       }
+
   and deserialize_SharedTypes__SimpleType__declaration:
     type arg0.
       (target => result(arg0, list(string)), target) =>
@@ -665,6 +649,7 @@ module Version1 = {
         };
       | _ => Error(["Expected an object"])
       }
+
   and deserialize_SharedTypes__SimpleType__expr:
     type arg0.
       (target => result(arg0, list(string)), target) =>
@@ -684,12 +669,7 @@ module Version1 = {
           )
         ) {
         | Belt.Result.Ok(arg0) =>
-          Ok(
-            [@implicit_arity] Variable(arg0):
-                                               _SharedTypes__SimpleType__expr(
-                                                 arg0,
-                                               ),
-          )
+          Ok(Variable(arg0): _SharedTypes__SimpleType__expr(arg0))
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag)])
@@ -852,12 +832,7 @@ module Version1 = {
           )
         ) {
         | Belt.Result.Ok(arg0) =>
-          Ok(
-            [@implicit_arity] Tuple(arg0):
-                                            _SharedTypes__SimpleType__expr(
-                                              arg0,
-                                            ),
-          )
+          Ok(Tuple(arg0): _SharedTypes__SimpleType__expr(arg0))
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag), arg0, arg1]) when "Fn" == tag =>
@@ -951,6 +926,7 @@ module Version1 = {
         Error(["Invalid constructor: " ++ tag])
       | _ => Error(["Expected an array"])
       }
+
   and deserialize_Stdlib__hashtbl____t:
     'arg0 'arg1.
     (
@@ -2043,6 +2019,7 @@ module Version1 = {
         };
       | _ => Error(["Expected an object"])
       }
+
   and deserialize_TypeMapSerde__Config__Locked__lockedEntry:
     target =>
     result(_TypeMapSerde__Config__Locked__lockedEntry, list(string)) =
@@ -2244,6 +2221,7 @@ module Version1 = {
         };
       | _ => Error(["Expected an object"])
       }
+
   and deserialize_TypeMap__DigTypes____shortReference:
     target => result(_TypeMap__DigTypes__shortReference, list(string)) =
     value =>
@@ -2337,6 +2315,7 @@ module Version1 = {
       )(
         value,
       )
+
   and deserialize_TypeMap__DigTypes____typeSource:
     type arg0.
       (target => result(arg0, list(string)), target) =>
@@ -2356,23 +2335,13 @@ module Version1 = {
           )
         ) {
         | Belt.Result.Ok(arg0) =>
-          Ok(
-            [@implicit_arity] Builtin(arg0):
-                                              _TypeMap__DigTypes__typeSource(
-                                                arg0,
-                                              ),
-          )
+          Ok(Builtin(arg0): _TypeMap__DigTypes__typeSource(arg0))
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag), arg0]) when "Public" == tag =>
         switch (referenceTransformer(arg0)) {
         | Belt.Result.Ok(arg0) =>
-          Ok(
-            [@implicit_arity] Public(arg0):
-                                             _TypeMap__DigTypes__typeSource(
-                                               arg0,
-                                             ),
-          )
+          Ok(Public(arg0): _TypeMap__DigTypes__typeSource(arg0))
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag)])
@@ -2382,6 +2351,7 @@ module Version1 = {
         Error(["Invalid constructor: " ++ tag])
       | _ => Error(["Expected an array"])
       }
+
   and serialize_Analyze__TopTypes____moduleName:
     _Analyze__TopTypes__moduleName => target =
     value => Json.String(value)

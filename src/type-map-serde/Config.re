@@ -1,17 +1,22 @@
+type simpleExpr =
+  SharedTypes.SimpleType.expr(
+    TypeMap.DigTypes.typeSource(TypeMap.DigTypes.shortReference),
+  );
 
-type simpleExpr = SharedTypes.SimpleType.expr(TypeMap.DigTypes.typeSource(
-  TypeMap.DigTypes.shortReference
-));
-
-type simpleDeclaration = SharedTypes.SimpleType.declaration(TypeMap.DigTypes.typeSource(
-  TypeMap.DigTypes.shortReference
-));
+type simpleDeclaration =
+  SharedTypes.SimpleType.declaration(
+    TypeMap.DigTypes.typeSource(TypeMap.DigTypes.shortReference),
+  );
 
 [@rename.Rex_json "rex-json"]
 [@rename.Ezjsonm "ezjsonm"]
 [@rename.Bs_json "Js.Json"]
 [@rename.Yojson "yojson"]
-type engine = Rex_json | Bs_json | Ezjsonm | Yojson;
+type engine =
+  | Rex_json
+  | Bs_json
+  | Ezjsonm
+  | Yojson;
 
 [@rename.module_ "module"]
 [@migrate.args custom => custom.args == 0 ? None : Some(custom.args)]
@@ -43,12 +48,15 @@ type entry = {
 // type rexJsonConfig = {
 //   mode: rexMode,
 // };
-type errorMode = Result | TrackedExceptions | PlainExceptions;
+type errorMode =
+  | Result
+  | TrackedExceptions
+  | PlainExceptions;
 
 // TODO: support these options (currently ignored)
 type engineOptions = {
   tailCall: bool,
-  deserializeErrorMode: errorMode
+  deserializeErrorMode: errorMode,
 };
 
 type engineConfig = {
@@ -67,28 +75,41 @@ type engines = {
   yojson: option(engineConfig),
 };
 
-let engineConfigs = engines => switch engines {
+let engineConfigs = engines =>
+  switch (engines) {
   | {rex_json: None, bs_json: Some(config)} => [(Bs_json, config)]
   | {rex_json: Some(config), bs_json: None} => [(Rex_json, config)]
-  | {rex_json: Some(rex), bs_json: Some(bs)} => [(Rex_json, rex), (Bs_json, bs)]
+  | {rex_json: Some(rex), bs_json: Some(bs)} => [
+      (Rex_json, rex),
+      (Bs_json, bs),
+    ]
+  | {yojson: Some(config)} => [(Yojson, config)]
   | {rex_json: None, bs_json: None} => []
-};
+  };
 
 let engineConfigs = engines => {
   let result = [];
-  let result = switch engines {
+  let result =
+    switch (engines) {
     | {rex_json: Some(config)} => [(Rex_json, config), ...result]
     | _ => result
-  };
-  let result = switch engines {
+    };
+  let result =
+    switch (engines) {
     | {bs_json: Some(config)} => [(Bs_json, config), ...result]
     | _ => result
-  };
-  let result = switch engines {
+    };
+  let result =
+    switch (engines) {
     | {ezjsonm: Some(config)} => [(Ezjsonm, config), ...result]
     | _ => result
-  };
-  result
+    };
+  let result =
+    switch (engines) {
+    | {yojson: Some(config)} => [(Yojson, config), ...result]
+    | _ => result
+    };
+  result;
 };
 
 let activeEngines = engines => engineConfigs(engines)->Belt.List.map(fst);
@@ -112,25 +133,23 @@ let empty = {
   lockedTypes: None,
   engines: {
     rex_json: None,
-    bs_json: Some({
-      output: "src/TypeSerde.re",
-      helpers: None,
-      options: None,
-    }),
+    bs_json: Some({output: "src/TypeSerde.re", helpers: None, options: None}),
     ezjsonm: None,
     yojson: None,
   },
   globalEngines: None,
-  entries: [{
-    file: "src/Types.re",
-    type_: "config",
-    publicName: None,
-    engines: None,
-    history: None,
-    minVersion: None,
-  }],
+  entries: [
+    {
+      file: "src/Types.re",
+      type_: "config",
+      publicName: None,
+      engines: None,
+      history: None,
+      minVersion: None,
+    },
+  ],
   custom: [],
-}
+};
 
 module Locked = {
   [@migrate.engines l => []]
@@ -142,10 +161,9 @@ module Locked = {
     name: string,
   };
 
-
   type lockedConfig('reference) = {
     entries: list(lockedEntry),
-    typeMap: TypeMap.DigTypes.typeMap('reference)
+    typeMap: TypeMap.DigTypes.typeMap('reference),
   };
 
   [@migrate
@@ -156,7 +174,12 @@ module Locked = {
             entries:
               config.entries
               ->Belt.List.map(({moduleName, modulePath, name}) =>
-                  {moduleName, modulePath, name, engines: [(engine, config.engineVersion)]}
+                  {
+                    moduleName,
+                    modulePath,
+                    name,
+                    engines: [(engine, config.engineVersion)],
+                  }
                 ),
           }
         ),
@@ -168,15 +191,21 @@ module Locked = {
   let getVersion = (lockfile, version) => lockfile.versions[version - 1];
   let addVersion = (lockfile, ~typeMap, ~entries) => {
     // ...lockfile,
-    versions: Belt.List.toArray(Belt.List.fromArray(lockfile.versions) @ [{typeMap, entries}])
+    versions:
+      Belt.List.toArray(
+        Belt.List.fromArray(lockfile.versions) @ [{typeMap, entries}],
+      ),
   };
   let updateVersion = (lockfile, ~typeMap, ~entries) => {
     // ...lockfile,
-    versions: Belt.List.toArray(
-      Belt.List.fromArray(lockfile.versions)->Belt.List.reverse->Belt.List.tailExn->Belt.List.reverse
-      @
-      [{typeMap, entries}]
-    )
+    versions:
+      Belt.List.toArray(
+        Belt.List.fromArray(lockfile.versions)
+        ->Belt.List.reverse
+        ->Belt.List.tailExn
+        ->Belt.List.reverse
+        @ [{typeMap, entries}],
+      ),
   };
 };
 
