@@ -19,6 +19,9 @@ let target = [%type: [ `Assoc(list((string, target)))
        | `List(list(target))
        | `Null
        | `String(string)
+       | `Intlit(string)
+       | `Tuple(list(target))
+       | `Variant((string, option(target)))
        ]
        ];
 
