@@ -1,6 +1,8 @@
 
 # Milk 🥛 : Stress-free serialization & deserialization for Reason/OCaml
 
+[![Build Status](https://dev.azure.com/jaredly/milk/_apis/build/status/jaredly.milk?branchName=master)](https://dev.azure.com/jaredly/milk/_build/latest?definitionId=1?branchName=master)
+
 🚧 **Stability: settling** 🚧 This is recently released, still settling down API n stuff, but I plan to maintain backwards compatability. Also I'm still working on documentation, so some things might be missing or unclear.
 
 ```
