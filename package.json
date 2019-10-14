@@ -28,7 +28,9 @@
     "@opam/ppx_tools": "*",
     "@opam/ppxlib": "*",
     "rex-json": "*",
-    "reason-language-server": "jaredly/reason-language-server",
     "ocaml": "~4.7.2"
+  },
+  "devDependencies": {
+    "reason-language-server": "jaredly/reason-language-server"
   }
 }
