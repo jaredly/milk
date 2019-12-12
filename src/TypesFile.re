@@ -1,3 +1,4 @@
+open Migrate_parsetree.Ast_407;
 open DigUtils;
 
 let lockTypes = (~currentVersion, version, typeMap, lockedDeep) => {

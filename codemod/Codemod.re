@@ -31,6 +31,7 @@ let run = (~rootPath, ~filterPath, modify) => {
     | Analyze.BuildSystem.V402 => Process_402.fullForCmt
     | V406 => Process_406.fullForCmt
     | V407 => Process_407.fullForCmt
+    | V408 => Process_408.fullForCmt
   })(~allLocations=true);
 
   let module Convert = Migrate_parsetree.Convert(Migrate_parsetree.OCaml_404, Migrate_parsetree.OCaml_407);

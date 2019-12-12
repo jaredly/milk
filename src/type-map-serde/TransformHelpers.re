@@ -1,4 +1,5 @@
 
+// open Migrate_parsetree.Ast_407;
 
 open Vendor;
 open Util;
@@ -8,58 +9,62 @@ let wrapError = value => switch value {
   | Ok(v) => Ok(v)
 };
 
+module ToCurrent = Migrate_parsetree.Convert(Migrate_parsetree.OCaml_407, Migrate_parsetree.OCaml_408);
+module FromCurrent = Migrate_parsetree.Convert(Migrate_parsetree.OCaml_408, Migrate_parsetree.OCaml_407);
+
 let deserialize_Parsetree____structure = json => {
   let%try text = RJson.string(json);
   let lexbuf = Stdlib.Lexing.from_string(text);
-  Ok(Parser.implementation(Lexer.token, lexbuf))
+  Ok(FromCurrent.copy_structure(Parser.implementation(Lexer.token, lexbuf)))
 } |> wrapError;
 
 let serialize_Parsetree____structure = structure => {
-  Pprintast.structure(Stdlib.Format.str_formatter, structure);
+  Pprintast.structure(Stdlib.Format.str_formatter, ToCurrent.copy_structure(structure));
   Json.String(Stdlib.Format.flush_str_formatter());
 };
 
 let deserialize_Parsetree____signature = json => {
   let%try text = RJson.string(json);
   let lexbuf = Stdlib.Lexing.from_string(text);
-  Ok(Parser.interface(Lexer.token, lexbuf))
+  Ok(FromCurrent.copy_signature(Parser.interface(Lexer.token, lexbuf)))
 } |> wrapError;
 
 let serialize_Parsetree____signature = data => {
-  Pprintast.signature(Stdlib.Format.str_formatter, data);
+  Pprintast.signature(Stdlib.Format.str_formatter, ToCurrent.copy_signature(data));
   Json.String(Stdlib.Format.flush_str_formatter());
 };
 
 let deserialize_Parsetree____pattern = json => {
   let%try text = RJson.string(json);
   let lexbuf = Stdlib.Lexing.from_string(text);
-  Ok(Parser.parse_pattern(Lexer.token, lexbuf))
+  Ok(FromCurrent.copy_pattern(Parser.parse_pattern(Lexer.token, lexbuf)))
 } |> wrapError;
 
 let serialize_Parsetree____pattern = data => {
-  Pprintast.pattern(Stdlib.Format.str_formatter, data);
+  Pprintast.pattern(Stdlib.Format.str_formatter, ToCurrent.copy_pattern(data));
   Json.String(Stdlib.Format.flush_str_formatter());
 };
 
-let deserialize_Parsetree____core_type = json => {
+let deserialize_Parsetree____core_type = (json): result(Migrate_parsetree.Ast_407.Parsetree.core_type, list(string)) => {
   let%try text = RJson.string(json);
   let lexbuf = Stdlib.Lexing.from_string(text);
-  Ok(Parser.parse_core_type(Lexer.token, lexbuf))
+  let typ = Parser.parse_core_type(Lexer.token, lexbuf);
+  Ok(FromCurrent.copy_core_type(typ))
 } |> wrapError;
 
 let serialize_Parsetree____core_type = data => {
-  Pprintast.core_type(Stdlib.Format.str_formatter, data);
+  Pprintast.core_type(Stdlib.Format.str_formatter, ToCurrent.copy_core_type(data));
   Json.String(Stdlib.Format.flush_str_formatter());
 };
 
 let deserialize_Parsetree____expression = json => {
   let%try text = RJson.string(json);
   let lexbuf = Stdlib.Lexing.from_string(text);
-  Ok(Parser.parse_expression(Lexer.token, lexbuf))
+  Ok(FromCurrent.copy_expression(Parser.parse_expression(Lexer.token, lexbuf)))
 } |> wrapError;
 
 let serialize_Parsetree____expression = data => {
-  Pprintast.expression(Stdlib.Format.str_formatter, data);
+  Pprintast.expression(Stdlib.Format.str_formatter, ToCurrent.copy_expression(data));
   Json.String(Stdlib.Format.flush_str_formatter());
 };
 

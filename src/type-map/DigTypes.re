@@ -1,3 +1,4 @@
+open Migrate_parsetree.Ast_407;
 
 type shortReference = (Analyze.TopTypes.moduleName, list(string), string);
 

@@ -1,3 +1,4 @@
+open Migrate_parsetree.Ast_407;
 
 open Analyze;
 open DigTypes;
@@ -13,7 +14,7 @@ let getType = (~env: Query.queryEnv, name) => {
 };
 
 let isBuiltin = fun
-  | "list" | "string" | "option" | "int" | "float" | "bool" | "array" => true
+  | "list" | "string" | "option" | "int" | "float" | "bool" | "array" | "char" | "unit" | "int32" | "int64" | "nativeint" => true
   | _ => false;
 
 let rec getFullType_ = (env, path, name) => switch path {
@@ -44,7 +45,7 @@ let mapSource = (~env, ~getModule, path) => {
         switch (Query.hashFind(env.file.stamps.types, stamp)) {
           | None =>
             switch (Path.name(path)) {
-              | "list" | "string" | "option" | "int" | "float" | "bool" | "array" => None
+              | x when isBuiltin(x) => None
               | _ =>
               print_endline("Bad stamp " ++ Path.name(path) ++ " in " ++ env.file.uri ++ " :: " ++ string_of_int(stamp))
               None
@@ -96,6 +97,8 @@ let recursiveMapSource = (~env, ~getModule, loop, path) => {
 
   result
 };
+// module FromCurrent = Migrate_parsetree.Convert(Migrate_parsetree.OCaml_408, Migrate_parsetree.OCaml_407);
+module FromCurrent = Migrate_parsetree_408_407_migrate;
 
 let rec digType = (~tbl, ~set, ~state, ~package, ~env, ~getModule, key, t: SharedTypes.declared(SharedTypes.Type.t)) => {
   if (!Hashtbl.mem(set, key)) {
@@ -103,7 +106,7 @@ let rec digType = (~tbl, ~set, ~state, ~package, ~env, ~getModule, key, t: Share
     Hashtbl.replace(set, key, ());
     Hashtbl.replace(tbl, key,
         (
-          t.contents.typ.migrateAttributes(),
+          t.contents.typ.migrateAttributes()->Belt.List.map(FromCurrent.copy_attribute),
       SharedTypes.SimpleType.declMapSource(
         recursiveMapSource(~env, ~getModule, loop),
           t.contents.typ.asSimpleDeclaration(t.name.txt),

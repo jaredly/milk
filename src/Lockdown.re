@@ -1,7 +1,9 @@
 let typesAndDependencies = tbl => {
   let collector = Hashtbl.create(10);
 
-  let rec loop = source =>
+  let rec loop = source => {
+    // print_endline("Soruce loop");
+
     if (!Hashtbl.mem(collector, source)) {
       let (_attributes, decl) = Hashtbl.find(tbl, source);
       collector->Hashtbl.replace(source, `Reference(source));
@@ -27,8 +29,10 @@ let typesAndDependencies = tbl => {
 
       collector->Hashtbl.replace(source, `Resolved(contents));
     };
+  };
 
   Hashtbl.iter((key, _value) => loop(key), tbl);
+  // print_endline("Lopped")
 
   let collected = Hashtbl.create(10);
   collector
@@ -38,8 +42,11 @@ let typesAndDependencies = tbl => {
        | _ => assert(false)
        }
      );
+    
+  // Printexc.
 
   let resolve = (source, items) => {
+    // print_endline("Resolve")
     let (unresolved, contents) =
       items->Belt.List.reduce((false, []), ((unresolved, contents), item) =>
         switch (item) {
@@ -49,12 +56,15 @@ let typesAndDependencies = tbl => {
         }
       );
     Hashtbl.replace(collected, source, contents);
+    // print_endline("< Resolve")
     unresolved;
   };
 
   let rec loop = i => {
-    let unresolved =
-      Hashtbl.fold((k, v, unresolved) => resolve(k, v) || unresolved, collected, false);
+    // print_endline("Loop " ++ string_of_int(i));
+    let unresolved = Hashtbl.to_seq(collected)->Array.of_seq->Belt.Array.reduce(false, (unresolved, (k, v)) => resolve(k, v) || unresolved);
+    // let unresolved =
+    //   Hashtbl.fold((k, v, unresolved) => resolve(k, v) || unresolved, collected, false);
     if (unresolved) {
       if (i > 1000) {
         failwith("Failed to resolve in 1000 iterations");
@@ -62,7 +72,9 @@ let typesAndDependencies = tbl => {
       loop(i + 1);
     };
   };
+  // print_endline("Looping");
   loop(0);
+  // print_endline("looped");
 
   let resolved = Hashtbl.create(10);
   collected

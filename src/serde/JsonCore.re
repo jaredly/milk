@@ -1,5 +1,6 @@
 
 
+open Migrate_parsetree.Ast_407;
 open Parsetree;
 let loc = Location.none;
 

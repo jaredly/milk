@@ -1,3 +1,4 @@
+open Migrate_parsetree.Ast_407;
 open Belt;
 
 open SharedTypes.SimpleType;
@@ -23,7 +24,7 @@ let showSource = (source, args) =>
     args,
   );
 
-let rec outputDeclaration = (~alias, moduleName, modulePath, name, showSource, declaration) => {
+let rec outputDeclaration = (~alias, moduleName, modulePath, name, showSource, declaration: SharedTypes.SimpleType.declaration('source)) => {
   let declarationName: Ast_helper.str = Location.mknoloc(makeLockedTypeName(moduleName, modulePath, name))
   let fullReference = switch alias {
     | None => None

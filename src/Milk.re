@@ -1,3 +1,4 @@
+open Migrate_parsetree.Ast_407;
 Printexc.record_backtrace(true);
 open Analyze;
 module Json = Vendor.Json;
@@ -109,7 +110,9 @@ let makeLockfilePath = configPath => {
   }
 };
 
+module ToCurrent = Migrate_parsetree.Convert(Migrate_parsetree.OCaml_407, Migrate_parsetree.OCaml_408);
 let outputStructure = (~fileName, ~structure) => {
+  let structure = ToCurrent.copy_structure(structure);
   if (fileName->Filename.check_suffix(".re")) {
     let reason_structure = Reason_toolchain.From_current.copy_structure(structure);
     Reason_toolchain.RE.print_implementation_with_comments(

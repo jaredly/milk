@@ -1,3 +1,4 @@
+open Migrate_parsetree.Ast_407;
 [@ocaml.warning "-34"];
 module Types1 = {
   type _Analyze__TopTypes__moduleName = string
