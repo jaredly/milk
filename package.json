@@ -1,33 +1,33 @@
 {
-  "name": "@jaredly/milk",
-  "version": "1.0.0",
-  "scripts": {
-    "types": "dune exec milk"
-  },
-  "keywords": [
-    "Reason",
-    "lsp",
-    "IDE"
-  ],
-  "repository": {
-    "url": "jaredly/milk",
-    "type": "git"
-  },
-  "description": "Milk 🥛 : Stress-free serialization & deserialization for Reason/OCaml",
-  "author": "Jared Forsyth",
-  "license": "ISC",
-  "esy": {
-    "build": "dune build -p milk",
-    "buildsInSource": "_build"
-  },
-  "dependencies": {
-    "@opam/dune": "*",
-    "@esy-ocaml/reason": "*",
-    "@opam/ocaml-migrate-parsetree": "*",
-    "@opam/ppx_tools_versioned": "*",
-    "@opam/ppx_tools": "*",
-    "rex-json": "*",
-    "reason-language-server": "jaredly/reason-language-server",
-    "ocaml": "~4.8.0"
-  }
+    "name": "@jaredly/milk",
+    "version": "1.0.0",
+   "scripts": {
+        "types": "dune exec milk"
+    },
+    "keywords": [
+        "Reason",
+        "lsp",
+        "IDE"
+    ],
+    "repository": {
+        "url": "jaredly/milk",
+        "type": "git"
+    },
+    "description": "Milk 🥛 : Stress-free serialization & deserialization for Reason/OCaml",
+    "author": "Jared Forsyth",
+    "license": "ISC",
+    "esy": {
+        "build": "dune build -p milk",
+        "buildsInSource": "_build"
+    },
+    "dependencies": {
+        "@opam/dune": "*",
+        "@esy-ocaml/reason": "3.5.2",
+        "@opam/ocaml-migrate-parsetree": "*",
+        "@opam/ppx_tools_versioned": "*",
+        "@opam/ppx_tools": "*",
+        "rex-json": "*",
+        "reason-language-server": "jaredly/reason-language-server#try",
+        "ocaml": "~4.8.0"
+    }
 }
