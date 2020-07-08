@@ -1,5 +1,5 @@
 {
-  "checksum": "4b4215898daf8cebe7ff35d38e10162a",
+  "checksum": "9afee7df1b78a18c5a3005e1f3ceeea5",
   "root": "@jaredly/milk@link-dev:./package.json",
   "node": {
     "rex-json@1.4.0@d41d8cd9": {
@@ -16,18 +16,11 @@
       "dependencies": [],
       "devDependencies": []
     },
-    "reason-language-server@github:jaredly/reason-language-server#0cc54af855a1f6d77d28dee656404198d7c2089e@d41d8cd9": {
-      "id":
-        "reason-language-server@github:jaredly/reason-language-server#0cc54af855a1f6d77d28dee656404198d7c2089e@d41d8cd9",
+    "reason-language-server@link:../reason-language-server": {
+      "id": "reason-language-server@link:../reason-language-server",
       "name": "reason-language-server",
-      "version":
-        "github:jaredly/reason-language-server#0cc54af855a1f6d77d28dee656404198d7c2089e",
-      "source": {
-        "type": "install",
-        "source": [
-          "github:jaredly/reason-language-server#0cc54af855a1f6d77d28dee656404198d7c2089e"
-        ]
-      },
+      "version": "link:../reason-language-server",
+      "source": { "type": "link", "path": "../reason-language-server" },
       "overrides": [],
       "dependencies": [
         "rex-json@1.4.0@d41d8cd9", "ocaml@4.8.1000@d41d8cd9",
@@ -1094,7 +1087,7 @@
       "overrides": [],
       "dependencies": [
         "rex-json@1.4.0@d41d8cd9",
-        "reason-language-server@github:jaredly/reason-language-server#0cc54af855a1f6d77d28dee656404198d7c2089e@d41d8cd9",
+        "reason-language-server@link:../reason-language-server",
         "ocaml@4.8.1000@d41d8cd9",
         "@opam/ppx_tools_versioned@opam:5.4.0@48c10ee1",
         "@opam/ppx_tools@opam:6.2@62a3aff2",

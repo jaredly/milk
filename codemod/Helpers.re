@@ -131,11 +131,15 @@ let getExprType = (ctx, expr) => {
   let%try_force loc =
     References.locForLocations(~extra=ctx.full.extra, expr.pexp_loc)
     |> RResult.orError(
-         "Could not find type for expr at "  ++ m ++ ". Probably the ast & compiled artifacts are out of sync.",
+         "Could not find type for expr at "
+         ++ m
+         ++ ". Probably the ast & compiled artifacts are out of sync.",
        );
   let env = Query.fileEnv(ctx.full.file);
+  Log.log("Get file1");
   let getModule =
     ctx.state->Analyze.State.fileForModule(~package=ctx.package);
+  Log.log("Got file1");
   switch (loc) {
   | Typed(typ, _) =>
     SharedTypes.SimpleType.mapSource(
@@ -147,8 +151,10 @@ let getExprType = (ctx, expr) => {
 };
 
 let getTypeDefinition = (ctx, {TypeMap.DigTypes.declared, env}) => {
+  Log.log("Get file2");
   let getModule =
     ctx.state->Analyze.State.fileForModule(~package=ctx.package);
+  Log.log("Got file2");
   SharedTypes.SimpleType.declMapSource(
     TypeMap.GetTypeMap.mapSource(~env, ~getModule),
     declared.contents.typ.asSimpleDeclaration(declared.name.txt),

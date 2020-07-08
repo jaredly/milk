@@ -1,7 +1,7 @@
 {
     "name": "@jaredly/milk",
     "version": "1.0.0",
-   "scripts": {
+    "scripts": {
         "types": "dune exec milk"
     },
     "keywords": [
@@ -29,5 +29,8 @@
         "rex-json": "*",
         "reason-language-server": "jaredly/reason-language-server#try",
         "ocaml": "~4.8.0"
+    },
+    "resolutions": {
+        "reason-language-server": "link:../reason-language-server"
     }
 }

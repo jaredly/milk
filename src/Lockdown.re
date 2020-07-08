@@ -1,9 +1,7 @@
 let typesAndDependencies = tbl => {
   let collector = Hashtbl.create(10);
 
-  let rec loop = source => {
-    // print_endline("Soruce loop");
-
+  let rec loop = source =>
     if (!Hashtbl.mem(collector, source)) {
       let (_attributes, decl) = Hashtbl.find(tbl, source);
       collector->Hashtbl.replace(source, `Reference(source));
@@ -12,7 +10,8 @@ let typesAndDependencies = tbl => {
         SharedTypes.SimpleType.usedSources(decl)
         ->Belt.List.keepMap(source =>
             switch (source) {
-            | TypeMap.DigTypes.NotFound => assert(false)
+            | TypeMap.DigTypes.NotFound => None
+            // assert(false)
             | Builtin(_) => None
             | Public(s) => Some(s)
             }
@@ -29,10 +28,8 @@ let typesAndDependencies = tbl => {
 
       collector->Hashtbl.replace(source, `Resolved(contents));
     };
-  };
 
   Hashtbl.iter((key, _value) => loop(key), tbl);
-  // print_endline("Lopped")
 
   let collected = Hashtbl.create(10);
   collector
@@ -42,27 +39,38 @@ let typesAndDependencies = tbl => {
        | _ => assert(false)
        }
      );
-    
+
   // Printexc.
 
   let resolve = (source, items) => {
-    // print_endline("Resolve")
+    print_endline("Resolve " ++ string_of_int(List.length(items)));
     let (unresolved, contents) =
-      items->Belt.List.reduce((false, []), ((unresolved, contents), item) =>
-        switch (item) {
-        | `Reference(inner) when inner == source => (unresolved, contents)
-        | `Reference(inner) => (true, collected->Hashtbl.find(inner) @ contents)
-        | `Plain(x) => (unresolved, [`Plain(x), ...contents])
-        }
+      List.fold_left(
+        ((unresolved, contents), item) =>
+          switch (item) {
+          | `Reference(inner) when inner == source => (unresolved, contents)
+          | `Reference(inner) => (
+              true,
+              collected->Hashtbl.find(inner) @ contents,
+            )
+          | `Plain(x) => (unresolved, [`Plain(x), ...contents])
+          },
+        (false, []),
+        items,
       );
+    print_endline("Resolve1");
     Hashtbl.replace(collected, source, contents);
-    // print_endline("< Resolve")
+    print_endline("< Resolve");
     unresolved;
   };
 
   let rec loop = i => {
-    // print_endline("Loop " ++ string_of_int(i));
-    let unresolved = Hashtbl.to_seq(collected)->Array.of_seq->Belt.Array.reduce(false, (unresolved, (k, v)) => resolve(k, v) || unresolved);
+    let unresolved =
+      Hashtbl.to_seq(collected)->List.of_seq
+      |> List.fold_left(
+           (unresolved, (k, v)) => resolve(k, v) || unresolved,
+           false,
+         );
     // let unresolved =
     //   Hashtbl.fold((k, v, unresolved) => resolve(k, v) || unresolved, collected, false);
     if (unresolved) {
@@ -72,9 +80,7 @@ let typesAndDependencies = tbl => {
       loop(i + 1);
     };
   };
-  // print_endline("Looping");
   loop(0);
-  // print_endline("looped");
 
   let resolved = Hashtbl.create(10);
   collected
