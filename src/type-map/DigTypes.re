@@ -48,3 +48,5 @@ type typeMap('reference) =
       SharedTypes.SimpleType.declaration(typeSource('reference)),
     ),
   );
+
+type typeMap2 = Parsetree.attributes;

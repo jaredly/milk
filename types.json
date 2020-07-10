@@ -8,9 +8,13 @@
         }
     },
     "entries": [
+        // {
+        //     "file": "src/type-map-serde/Config.re",
+        //     "type": "typeMap"
+        // },
         {
-            "file": "src/type-map-serde/Config.re",
-            "type": "serializableLockfile"
+            "file": "src/type-map/DigTypes.re",
+            "type": "typeMap2"
         },
         {
             "file": "src/type-map-serde/Config.re",
@@ -26,6 +30,11 @@
         }
     ],
     "custom": [
+        {
+            "module": "Ast_407",
+            "path": ["Parsetree"],
+            "name": "attributes"
+        },
         {
             "module": "Parsetree",
             "path": [],
