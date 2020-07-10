@@ -1,4 +1,4 @@
-
+open Migrate_parsetree.Ast_407;
 open Parsetree;
 
 open Codemod.Helpers;
@@ -20,7 +20,6 @@ let replaceErrors = (ctx, expr) =>
       switch (expr.pexp_desc) {
         /* We should be more flexible here, e.g. to accept Result.Error() in addition to Error() */
       | Pexp_construct({txt: Longident.Lident("Error")}, Some({pexp_desc: Pexp_tuple([arg])})) =>
-        let loc = Location.none
         switch (ctx->getExprType(arg)) {
           | Reference(Builtin("string"), []) => Some([%expr Error(Unspecified([%e arg]))])
           | _ => None

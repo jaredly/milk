@@ -1,3 +1,4 @@
+open Migrate_parsetree.Ast_407;
 open TypeMapSerde.Config;
 module Json = Vendor.Json;
 module Locked = TypeMapSerde.Config.Locked;

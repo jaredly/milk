@@ -152,7 +152,6 @@ let empty = {
 };
 
 module Locked = {
-  [@migrate.engines l => []]
   type lockedEntry = {
     moduleName: string,
     modulePath: list(string),
@@ -166,25 +165,6 @@ module Locked = {
     typeMap: TypeMap.DigTypes.typeMap('reference),
   };
 
-  [@migrate
-    ({engine, versions}) => {
-      versions:
-        versions->Belt.Array.map(config =>
-          {
-            entries:
-              config.entries
-              ->Belt.List.map(({moduleName, modulePath, name}) =>
-                  {
-                    moduleName,
-                    modulePath,
-                    name,
-                    engines: [(engine, config.engineVersion)],
-                  }
-                ),
-          }
-        ),
-    }
-  ];
   type lockfile('reference) = {versions: array(lockedConfig('reference))};
 
   let getLatestVersion = lockfile => Array.length(lockfile.versions);
@@ -209,4 +189,6 @@ module Locked = {
   };
 };
 
+type basic = Locked.lockedConfig(TypeMap.DigTypes.shortReference);
+type typeMap = TypeMap.DigTypes.typeMap(TypeMap.DigTypes.shortReference);
 type serializableLockfile = Locked.lockfile(TypeMap.DigTypes.shortReference);

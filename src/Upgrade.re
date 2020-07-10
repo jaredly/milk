@@ -1,3 +1,4 @@
+open Migrate_parsetree.Ast_407
 
 let migrateName = (~moduleName, ~modulePath, ~name) =>"migrate_" ++ Serde.MakeDeserializer.fullName(~moduleName, ~modulePath, ~name);
 
@@ -94,7 +95,7 @@ let orLog = (what, message) => {
   what
 };
 
-let migrateBetween = (~version as _, ~lockedDeep as _, variable, fullName, thisType, prevType, ~namedMigrateAttributes, ~prevTypeName, ~modulePath) => {
+let migrateBetween = (~version as _, ~lockedDeep as _, variable, fullName, thisType: SharedTypes.SimpleType.declaration('source), prevType: SharedTypes.SimpleType.declaration('source), ~namedMigrateAttributes, ~prevTypeName, ~modulePath) => {
   switch (thisType.body, prevType.body) {
   | (Expr(current), Expr(prev)) when current == prev => migrateExpr(variable, current)
   | (Record(items), Record(prevItems)) when items->Belt.List.every(item => {

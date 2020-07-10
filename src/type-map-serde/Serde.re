@@ -1,30 +1,36 @@
-[@ocaml.warning "-34"];
+[@ocaml.warning "-34-39"];
 module Types1 = {
-  type _Analyze__TopTypes__moduleName = string
-  and _Asttypes__loc('a) =
-    Asttypes.loc('a) = {
-      txt: 'a,
-      loc: _Location__t,
-    }
-  and _Location__t =
+  type _Location__t =
     Location.t = {
       loc_start: _Stdlib__lexing__position,
       loc_end: _Stdlib__lexing__position,
       loc_ghost: bool,
     }
-  and _Parsetree__attribute = (_Asttypes__loc(string), _Parsetree__payload)
-  and _Parsetree__attributes = list(_Parsetree__attribute)
-  and _Parsetree__core_type = Parsetree.core_type
-  and _Parsetree__expression = Parsetree.expression
-  and _Parsetree__pattern = Parsetree.pattern
-  and _Parsetree__payload =
-    Parsetree.payload =
-      | PStr(_Parsetree__structure)
-      | PSig(_Parsetree__signature)
-      | PTyp(_Parsetree__core_type)
-      | PPat(_Parsetree__pattern, option(_Parsetree__expression))
-  and _Parsetree__signature = Parsetree.signature
-  and _Parsetree__structure = Parsetree.structure
+  and _Migrate_parsetree__Ast______Asttypes__loc('a) =
+    Migrate_parsetree__Ast_407.Asttypes.loc('a) = {
+      txt: 'a,
+      loc: _Location__t,
+    }
+  and _Migrate_parsetree__Ast______Parsetree__attribute = (
+    _Migrate_parsetree__Ast______Asttypes__loc(string),
+    _Migrate_parsetree__Ast______Parsetree__payload,
+  )
+  and _Migrate_parsetree__Ast______Parsetree__attributes =
+    list(_Migrate_parsetree__Ast______Parsetree__attribute)
+  and _Migrate_parsetree__Ast______Parsetree__core_type = Migrate_parsetree__Ast_407.Parsetree.core_type
+  and _Migrate_parsetree__Ast______Parsetree__expression = Migrate_parsetree__Ast_407.Parsetree.expression
+  and _Migrate_parsetree__Ast______Parsetree__pattern = Migrate_parsetree__Ast_407.Parsetree.pattern
+  and _Migrate_parsetree__Ast______Parsetree__payload =
+    Migrate_parsetree__Ast_407.Parsetree.payload =
+      | PStr(_Migrate_parsetree__Ast______Parsetree__structure)
+      | PSig(_Migrate_parsetree__Ast______Parsetree__signature)
+      | PTyp(_Migrate_parsetree__Ast______Parsetree__core_type)
+      | PPat(
+          _Migrate_parsetree__Ast______Parsetree__pattern,
+          option(_Migrate_parsetree__Ast______Parsetree__expression),
+        )
+  and _Migrate_parsetree__Ast______Parsetree__signature = Migrate_parsetree__Ast_407.Parsetree.signature
+  and _Migrate_parsetree__Ast______Parsetree__structure = Migrate_parsetree__Ast_407.Parsetree.structure
   and _SharedTypes__SimpleType__body('source) =
     SharedTypes.SimpleType.body('source) =
       | Open
@@ -148,16 +154,12 @@ module Types1 = {
       versions:
         array(_TypeMapSerde__Config__Locked__lockedConfig('reference)),
     }
-  and _TypeMap__DigTypes__shortReference = (
-    _Analyze__TopTypes__moduleName,
-    list(string),
-    string,
-  )
+  and _TypeMap__DigTypes__shortReference = (string, list(string), string)
   and _TypeMap__DigTypes__typeMap('reference) =
     _Stdlib__hashtbl__t(
       _TypeMap__DigTypes__shortReference,
       (
-        _Parsetree__attributes,
+        _Migrate_parsetree__Ast______Parsetree__attributes,
         _SharedTypes__SimpleType__declaration(
           _TypeMap__DigTypes__typeSource('reference),
         ),
@@ -165,56 +167,15 @@ module Types1 = {
     )
   and _TypeMap__DigTypes__typeSource('reference) =
     TypeMap__DigTypes.typeSource('reference) =
-      | Builtin(string) | Public('reference) | NotFound;
+      | Builtin(string) | Public('reference) | NotFound(string);
 };
 let currentVersion = 1;
 type target = Json.t;
 let schemaPropertyName = "milkSchemaVersion";
 module Version1 = {
   open Types1;
-  let rec deserialize_Analyze__TopTypes____moduleName:
-    target => result(_Analyze__TopTypes__moduleName, list(string)) =
-    value =>
-      (
-        string =>
-          switch (string) {
-          | Json.String(string) => Ok(string)
-          | _ => Error(["epected a string"])
-          }
-      )(
-        value,
-      )
-  and deserialize_Asttypes____loc:
-    type arg0.
-      (target => result(arg0, list(string)), target) =>
-      result(_Asttypes__loc(arg0), list(string)) =
-    (aTransformer, record) =>
-      switch (record) {
-      | Json.Object(items) =>
-        let inner = attr_loc => {
-          let inner = attr_txt =>
-            Ok({txt: attr_txt, loc: attr_loc}: _Asttypes__loc(arg0));
-          switch (Belt.List.getAssoc(items, "txt", (==))) {
-          | None => Error(["No attribute 'txt'"])
-          | Some(json) =>
-            switch (aTransformer(json)) {
-            | Error(error) => Error(["attribute 'txt'", ...error])
-            | Ok(data) => inner(data)
-            }
-          };
-        };
-        switch (Belt.List.getAssoc(items, "loc", (==))) {
-        | None => Error(["No attribute 'loc'"])
-        | Some(json) =>
-          switch (deserialize_Location____t(json)) {
-          | Error(error) => Error(["attribute 'loc'", ...error])
-          | Ok(data) => inner(data)
-          }
-        };
-      | _ => Error(["Expected an object"])
-      }
-
-  and deserialize_Location____t: target => result(_Location__t, list(string)) =
+  let rec deserialize_Location____t:
+    target => result(_Location__t, list(string)) =
     record =>
       switch (record) {
       | Json.Object(items) =>
@@ -267,18 +228,55 @@ module Version1 = {
         };
       | _ => Error(["Expected an object"])
       }
-  and deserialize_Parsetree____attribute:
-    target => result(_Parsetree__attribute, list(string)) =
+  and deserialize_Migrate_parsetree__Ast_407__Asttypes__loc:
+    type arg0.
+      (target => result(arg0, list(string)), target) =>
+      result(_Migrate_parsetree__Ast______Asttypes__loc(arg0), list(string)) =
+    (aTransformer, record) =>
+      switch (record) {
+      | Json.Object(items) =>
+        let inner = attr_loc => {
+          let inner = attr_txt =>
+            Ok(
+              {txt: attr_txt, loc: attr_loc}:
+                                               _Migrate_parsetree__Ast______Asttypes__loc(
+                                                 arg0,
+                                               ),
+            );
+          switch (Belt.List.getAssoc(items, "txt", (==))) {
+          | None => Error(["No attribute 'txt'"])
+          | Some(json) =>
+            switch (aTransformer(json)) {
+            | Error(error) => Error(["attribute 'txt'", ...error])
+            | Ok(data) => inner(data)
+            }
+          };
+        };
+        switch (Belt.List.getAssoc(items, "loc", (==))) {
+        | None => Error(["No attribute 'loc'"])
+        | Some(json) =>
+          switch (deserialize_Location____t(json)) {
+          | Error(error) => Error(["attribute 'loc'", ...error])
+          | Ok(data) => inner(data)
+          }
+        };
+      | _ => Error(["Expected an object"])
+      }
+  and deserialize_Migrate_parsetree__Ast_407__Parsetree__attribute:
+    target =>
+    result(_Migrate_parsetree__Ast______Parsetree__attribute, list(string)) =
     value =>
       (
         json =>
           switch (json) {
           | Json.Array([arg0, arg1]) =>
-            switch (deserialize_Parsetree____payload(arg1)) {
-            | Belt.Result.Ok(arg1) =>
+            switch (
+              deserialize_Migrate_parsetree__Ast_407__Parsetree__payload(arg1)
+            ) {
+            | Ok(arg1) =>
               switch (
                 (
-                  deserialize_Asttypes____loc(string =>
+                  deserialize_Migrate_parsetree__Ast_407__Asttypes__loc(string =>
                     switch (string) {
                     | Json.String(string) => Ok(string)
                     | _ => Error(["epected a string"])
@@ -288,7 +286,7 @@ module Version1 = {
                   arg0,
                 )
               ) {
-              | Belt.Result.Ok(arg0) => Ok((arg0, arg1))
+              | Ok(arg0) => Ok((arg0, arg1))
               | Error(error) => Error(["tuple element 0", ...error])
               }
             | Error(error) => Error(["tuple element 1", ...error])
@@ -298,14 +296,15 @@ module Version1 = {
       )(
         value,
       )
-  and deserialize_Parsetree____attributes:
-    target => result(_Parsetree__attributes, list(string)) =
+  and deserialize_Migrate_parsetree__Ast_407__Parsetree__attributes:
+    target =>
+    result(_Migrate_parsetree__Ast______Parsetree__attributes, list(string)) =
     value =>
       (
         list =>
           switch (list) {
           | Json.Array(items) =>
-            let transformer = deserialize_Parsetree____attribute;
+            let transformer = deserialize_Migrate_parsetree__Ast_407__Parsetree__attribute;
             let rec loop = (collected, items) =>
               switch (items) {
               | [] => Ok(Belt.List.reverse(collected))
@@ -321,29 +320,48 @@ module Version1 = {
       )(
         value,
       )
-  and deserialize_Parsetree____core_type:
-    target => result(_Parsetree__core_type, list(string)) = TransformHelpers.deserialize_Parsetree____core_type
-  and deserialize_Parsetree____expression:
-    target => result(_Parsetree__expression, list(string)) = TransformHelpers.deserialize_Parsetree____expression
-  and deserialize_Parsetree____pattern:
-    target => result(_Parsetree__pattern, list(string)) = TransformHelpers.deserialize_Parsetree____pattern
-  and deserialize_Parsetree____payload:
-    target => result(_Parsetree__payload, list(string)) =
+  and deserialize_Migrate_parsetree__Ast_407__Parsetree__core_type:
+    target =>
+    result(_Migrate_parsetree__Ast______Parsetree__core_type, list(string)) = TransformHelpers.deserialize_Migrate_parsetree__Ast_407__Parsetree__core_type
+  and deserialize_Migrate_parsetree__Ast_407__Parsetree__expression:
+    target =>
+    result(_Migrate_parsetree__Ast______Parsetree__expression, list(string)) = TransformHelpers.deserialize_Migrate_parsetree__Ast_407__Parsetree__expression
+  and deserialize_Migrate_parsetree__Ast_407__Parsetree__pattern:
+    target =>
+    result(_Migrate_parsetree__Ast______Parsetree__pattern, list(string)) = TransformHelpers.deserialize_Migrate_parsetree__Ast_407__Parsetree__pattern
+  and deserialize_Migrate_parsetree__Ast_407__Parsetree__payload:
+    target =>
+    result(_Migrate_parsetree__Ast______Parsetree__payload, list(string)) =
     constructor =>
       switch (constructor) {
       | Json.Array([Json.String(tag), arg0]) when "PStr" == tag =>
-        switch (deserialize_Parsetree____structure(arg0)) {
-        | Belt.Result.Ok(arg0) => Ok(PStr(arg0): _Parsetree__payload)
+        switch (
+          deserialize_Migrate_parsetree__Ast_407__Parsetree__structure(arg0)
+        ) {
+        | Ok(arg0) =>
+          Ok(
+            [@implicit_arity] PStr(arg0): _Migrate_parsetree__Ast______Parsetree__payload,
+          )
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag), arg0]) when "PSig" == tag =>
-        switch (deserialize_Parsetree____signature(arg0)) {
-        | Belt.Result.Ok(arg0) => Ok(PSig(arg0): _Parsetree__payload)
+        switch (
+          deserialize_Migrate_parsetree__Ast_407__Parsetree__signature(arg0)
+        ) {
+        | Ok(arg0) =>
+          Ok(
+            [@implicit_arity] PSig(arg0): _Migrate_parsetree__Ast______Parsetree__payload,
+          )
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag), arg0]) when "PTyp" == tag =>
-        switch (deserialize_Parsetree____core_type(arg0)) {
-        | Belt.Result.Ok(arg0) => Ok(PTyp(arg0): _Parsetree__payload)
+        switch (
+          deserialize_Migrate_parsetree__Ast_407__Parsetree__core_type(arg0)
+        ) {
+        | Ok(arg0) =>
+          Ok(
+            [@implicit_arity] PTyp(arg0): _Migrate_parsetree__Ast______Parsetree__payload,
+          )
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag), arg0, arg1]) when "PPat" == tag =>
@@ -360,16 +378,20 @@ module Version1 = {
                   }
                 }
             )(
-              deserialize_Parsetree____expression,
+              deserialize_Migrate_parsetree__Ast_407__Parsetree__expression,
             )
           )(
             arg1,
           )
         ) {
-        | Belt.Result.Ok(arg1) =>
-          switch (deserialize_Parsetree____pattern(arg0)) {
-          | Belt.Result.Ok(arg0) =>
-            Ok([@implicit_arity] PPat(arg0, arg1): _Parsetree__payload)
+        | Ok(arg1) =>
+          switch (
+            deserialize_Migrate_parsetree__Ast_407__Parsetree__pattern(arg0)
+          ) {
+          | Ok(arg0) =>
+            Ok(
+              [@implicit_arity] PPat(arg0, arg1): _Migrate_parsetree__Ast______Parsetree__payload,
+            )
           | Error(error) => Error(["constructor argument 0", ...error])
           }
         | Error(error) => Error(["constructor argument 1", ...error])
@@ -378,10 +400,12 @@ module Version1 = {
         Error(["Invalid constructor: " ++ tag])
       | _ => Error(["Expected an array"])
       }
-  and deserialize_Parsetree____signature:
-    target => result(_Parsetree__signature, list(string)) = TransformHelpers.deserialize_Parsetree____signature
-  and deserialize_Parsetree____structure:
-    target => result(_Parsetree__structure, list(string)) = TransformHelpers.deserialize_Parsetree____structure
+  and deserialize_Migrate_parsetree__Ast_407__Parsetree__signature:
+    target =>
+    result(_Migrate_parsetree__Ast______Parsetree__signature, list(string)) = TransformHelpers.deserialize_Migrate_parsetree__Ast_407__Parsetree__signature
+  and deserialize_Migrate_parsetree__Ast_407__Parsetree__structure:
+    target =>
+    result(_Migrate_parsetree__Ast______Parsetree__structure, list(string)) = TransformHelpers.deserialize_Migrate_parsetree__Ast_407__Parsetree__structure
   and deserialize_SharedTypes__SimpleType__body:
     type arg0.
       (target => result(arg0, list(string)), target) =>
@@ -400,8 +424,13 @@ module Version1 = {
             arg0,
           )
         ) {
-        | Belt.Result.Ok(arg0) =>
-          Ok(Expr(arg0): _SharedTypes__SimpleType__body(arg0))
+        | Ok(arg0) =>
+          Ok(
+            [@implicit_arity] Expr(arg0):
+                                           _SharedTypes__SimpleType__body(
+                                             arg0,
+                                           ),
+          )
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag), arg0]) when "Record" == tag =>
@@ -422,7 +451,7 @@ module Version1 = {
                         arg1,
                       )
                     ) {
-                    | Belt.Result.Ok(arg1) =>
+                    | Ok(arg1) =>
                       switch (
                         (
                           string =>
@@ -434,7 +463,7 @@ module Version1 = {
                           arg0,
                         )
                       ) {
-                      | Belt.Result.Ok(arg0) => Ok((arg0, arg1))
+                      | Ok(arg0) => Ok((arg0, arg1))
                       | Error(error) => Error(["tuple element 0", ...error])
                       }
                     | Error(error) => Error(["tuple element 1", ...error])
@@ -457,8 +486,13 @@ module Version1 = {
             arg0,
           )
         ) {
-        | Belt.Result.Ok(arg0) =>
-          Ok(Record(arg0): _SharedTypes__SimpleType__body(arg0))
+        | Ok(arg0) =>
+          Ok(
+            [@implicit_arity] Record(arg0):
+                                             _SharedTypes__SimpleType__body(
+                                               arg0,
+                                             ),
+          )
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag), arg0]) when "Variant" == tag =>
@@ -492,7 +526,7 @@ module Version1 = {
                         arg2,
                       )
                     ) {
-                    | Belt.Result.Ok(arg2) =>
+                    | Ok(arg2) =>
                       switch (
                         (
                           list =>
@@ -520,7 +554,7 @@ module Version1 = {
                           arg1,
                         )
                       ) {
-                      | Belt.Result.Ok(arg1) =>
+                      | Ok(arg1) =>
                         switch (
                           (
                             string =>
@@ -532,7 +566,7 @@ module Version1 = {
                             arg0,
                           )
                         ) {
-                        | Belt.Result.Ok(arg0) => Ok((arg0, arg1, arg2))
+                        | Ok(arg0) => Ok((arg0, arg1, arg2))
                         | Error(error) =>
                           Error(["tuple element 0", ...error])
                         }
@@ -558,15 +592,19 @@ module Version1 = {
             arg0,
           )
         ) {
-        | Belt.Result.Ok(arg0) =>
-          Ok(Variant(arg0): _SharedTypes__SimpleType__body(arg0))
+        | Ok(arg0) =>
+          Ok(
+            [@implicit_arity] Variant(arg0):
+                                              _SharedTypes__SimpleType__body(
+                                                arg0,
+                                              ),
+          )
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag), ..._]) =>
         Error(["Invalid constructor: " ++ tag])
       | _ => Error(["Expected an array"])
       }
-
   and deserialize_SharedTypes__SimpleType__declaration:
     type arg0.
       (target => result(arg0, list(string)), target) =>
@@ -649,7 +687,6 @@ module Version1 = {
         };
       | _ => Error(["Expected an object"])
       }
-
   and deserialize_SharedTypes__SimpleType__expr:
     type arg0.
       (target => result(arg0, list(string)), target) =>
@@ -668,8 +705,13 @@ module Version1 = {
             arg0,
           )
         ) {
-        | Belt.Result.Ok(arg0) =>
-          Ok(Variable(arg0): _SharedTypes__SimpleType__expr(arg0))
+        | Ok(arg0) =>
+          Ok(
+            [@implicit_arity] Variable(arg0):
+                                               _SharedTypes__SimpleType__expr(
+                                                 arg0,
+                                               ),
+          )
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag)])
@@ -688,7 +730,7 @@ module Version1 = {
             arg1,
           )
         ) {
-        | Belt.Result.Ok(arg1) =>
+        | Ok(arg1) =>
           switch (
             (
               list =>
@@ -719,7 +761,7 @@ module Version1 = {
                           arg1,
                         )
                       ) {
-                      | Belt.Result.Ok(arg1) =>
+                      | Ok(arg1) =>
                         switch (
                           (
                             string =>
@@ -731,7 +773,7 @@ module Version1 = {
                             arg0,
                           )
                         ) {
-                        | Belt.Result.Ok(arg0) => Ok((arg0, arg1))
+                        | Ok(arg0) => Ok((arg0, arg1))
                         | Error(error) =>
                           Error(["tuple element 0", ...error])
                         }
@@ -755,7 +797,7 @@ module Version1 = {
               arg0,
             )
           ) {
-          | Belt.Result.Ok(arg0) =>
+          | Ok(arg0) =>
             Ok(
               [@implicit_arity] RowVariant(arg0, arg1):
                                                          _SharedTypes__SimpleType__expr(
@@ -792,9 +834,9 @@ module Version1 = {
             arg1,
           )
         ) {
-        | Belt.Result.Ok(arg1) =>
+        | Ok(arg1) =>
           switch (sourceTransformer(arg0)) {
-          | Belt.Result.Ok(arg0) =>
+          | Ok(arg0) =>
             Ok(
               [@implicit_arity] Reference(arg0, arg1):
                                                         _SharedTypes__SimpleType__expr(
@@ -831,8 +873,13 @@ module Version1 = {
             arg0,
           )
         ) {
-        | Belt.Result.Ok(arg0) =>
-          Ok(Tuple(arg0): _SharedTypes__SimpleType__expr(arg0))
+        | Ok(arg0) =>
+          Ok(
+            [@implicit_arity] Tuple(arg0):
+                                            _SharedTypes__SimpleType__expr(
+                                              arg0,
+                                            ),
+          )
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag), arg0, arg1]) when "Fn" == tag =>
@@ -841,7 +888,7 @@ module Version1 = {
             arg1,
           )
         ) {
-        | Belt.Result.Ok(arg1) =>
+        | Ok(arg1) =>
           switch (
             (
               list =>
@@ -859,7 +906,7 @@ module Version1 = {
                           arg1,
                         )
                       ) {
-                      | Belt.Result.Ok(arg1) =>
+                      | Ok(arg1) =>
                         switch (
                           (
                             (
@@ -884,7 +931,7 @@ module Version1 = {
                             arg0,
                           )
                         ) {
-                        | Belt.Result.Ok(arg0) => Ok((arg0, arg1))
+                        | Ok(arg0) => Ok((arg0, arg1))
                         | Error(error) =>
                           Error(["tuple element 0", ...error])
                         }
@@ -908,7 +955,7 @@ module Version1 = {
               arg0,
             )
           ) {
-          | Belt.Result.Ok(arg0) =>
+          | Ok(arg0) =>
             Ok(
               [@implicit_arity] Fn(arg0, arg1):
                                                  _SharedTypes__SimpleType__expr(
@@ -926,7 +973,6 @@ module Version1 = {
         Error(["Invalid constructor: " ++ tag])
       | _ => Error(["Expected an array"])
       }
-
   and deserialize_Stdlib__hashtbl____t:
     'arg0 'arg1.
     (
@@ -2019,7 +2065,6 @@ module Version1 = {
         };
       | _ => Error(["Expected an object"])
       }
-
   and deserialize_TypeMapSerde__Config__Locked__lockedEntry:
     target =>
     result(_TypeMapSerde__Config__Locked__lockedEntry, list(string)) =
@@ -2114,11 +2159,11 @@ module Version1 = {
                             arg1,
                           )
                         ) {
-                        | Belt.Result.Ok(arg1) =>
+                        | Ok(arg1) =>
                           switch (
                             deserialize_TypeMapSerde__Config____engine(arg0)
                           ) {
-                          | Belt.Result.Ok(arg0) => Ok((arg0, arg1))
+                          | Ok(arg0) => Ok((arg0, arg1))
                           | Error(error) =>
                             Error(["tuple element 0", ...error])
                           }
@@ -2221,7 +2266,6 @@ module Version1 = {
         };
       | _ => Error(["Expected an object"])
       }
-
   and deserialize_TypeMap__DigTypes____shortReference:
     target => result(_TypeMap__DigTypes__shortReference, list(string)) =
     value =>
@@ -2240,7 +2284,7 @@ module Version1 = {
                 arg2,
               )
             ) {
-            | Belt.Result.Ok(arg2) =>
+            | Ok(arg2) =>
               switch (
                 (
                   list =>
@@ -2267,9 +2311,19 @@ module Version1 = {
                   arg1,
                 )
               ) {
-              | Belt.Result.Ok(arg1) =>
-                switch (deserialize_Analyze__TopTypes____moduleName(arg0)) {
-                | Belt.Result.Ok(arg0) => Ok((arg0, arg1, arg2))
+              | Ok(arg1) =>
+                switch (
+                  (
+                    string =>
+                      switch (string) {
+                      | Json.String(string) => Ok(string)
+                      | _ => Error(["epected a string"])
+                      }
+                  )(
+                    arg0,
+                  )
+                ) {
+                | Ok(arg0) => Ok((arg0, arg1, arg2))
                 | Error(error) => Error(["tuple element 0", ...error])
                 }
               | Error(error) => Error(["tuple element 1", ...error])
@@ -2302,9 +2356,13 @@ module Version1 = {
                 arg1,
               )
             ) {
-            | Belt.Result.Ok(arg1) =>
-              switch (deserialize_Parsetree____attributes(arg0)) {
-              | Belt.Result.Ok(arg0) => Ok((arg0, arg1))
+            | Ok(arg1) =>
+              switch (
+                deserialize_Migrate_parsetree__Ast_407__Parsetree__attributes(
+                  arg0,
+                )
+              ) {
+              | Ok(arg0) => Ok((arg0, arg1))
               | Error(error) => Error(["tuple element 0", ...error])
               }
             | Error(error) => Error(["tuple element 1", ...error])
@@ -2315,7 +2373,6 @@ module Version1 = {
       )(
         value,
       )
-
   and deserialize_TypeMap__DigTypes____typeSource:
     type arg0.
       (target => result(arg0, list(string)), target) =>
@@ -2334,36 +2391,51 @@ module Version1 = {
             arg0,
           )
         ) {
-        | Belt.Result.Ok(arg0) =>
-          Ok(Builtin(arg0): _TypeMap__DigTypes__typeSource(arg0))
+        | Ok(arg0) =>
+          Ok(
+            [@implicit_arity] Builtin(arg0):
+                                              _TypeMap__DigTypes__typeSource(
+                                                arg0,
+                                              ),
+          )
         | Error(error) => Error(["constructor argument 0", ...error])
         }
       | Json.Array([Json.String(tag), arg0]) when "Public" == tag =>
         switch (referenceTransformer(arg0)) {
-        | Belt.Result.Ok(arg0) =>
-          Ok(Public(arg0): _TypeMap__DigTypes__typeSource(arg0))
+        | Ok(arg0) =>
+          Ok(
+            [@implicit_arity] Public(arg0):
+                                             _TypeMap__DigTypes__typeSource(
+                                               arg0,
+                                             ),
+          )
         | Error(error) => Error(["constructor argument 0", ...error])
         }
-      | Json.Array([Json.String(tag)])
-      | Json.String(tag) when "NotFound" == tag =>
-        Ok(NotFound: _TypeMap__DigTypes__typeSource(arg0))
+      | Json.Array([Json.String(tag), arg0]) when "NotFound" == tag =>
+        switch (
+          (
+            string =>
+              switch (string) {
+              | Json.String(string) => Ok(string)
+              | _ => Error(["epected a string"])
+              }
+          )(
+            arg0,
+          )
+        ) {
+        | Ok(arg0) =>
+          Ok(
+            [@implicit_arity] NotFound(arg0):
+                                               _TypeMap__DigTypes__typeSource(
+                                                 arg0,
+                                               ),
+          )
+        | Error(error) => Error(["constructor argument 0", ...error])
+        }
       | Json.Array([Json.String(tag), ..._]) =>
         Error(["Invalid constructor: " ++ tag])
       | _ => Error(["Expected an array"])
       }
-
-  and serialize_Analyze__TopTypes____moduleName:
-    _Analyze__TopTypes__moduleName => target =
-    value => Json.String(value)
-  and serialize_Asttypes____loc:
-    'arg0.
-    ('arg0 => target, _Asttypes__loc('arg0)) => target
-   =
-    (aTransformer, record) =>
-      Json.Object([
-        ("txt", aTransformer(record.txt)),
-        ("loc", serialize_Location____t(record.loc)),
-      ])
   and serialize_Location____t: _Location__t => target =
     record =>
       Json.Object([
@@ -2374,50 +2446,77 @@ module Version1 = {
         ("loc_end", serialize_Stdlib__lexing____position(record.loc_end)),
         ("loc_ghost", record.loc_ghost ? Json.True : Json.False),
       ])
-  and serialize_Parsetree____attribute: _Parsetree__attribute => target =
+  and serialize_Migrate_parsetree__Ast_407__Asttypes__loc:
+    'arg0.
+    ('arg0 => target, _Migrate_parsetree__Ast______Asttypes__loc('arg0)) =>
+    target
+   =
+    (aTransformer, record) =>
+      Json.Object([
+        ("txt", aTransformer(record.txt)),
+        ("loc", serialize_Location____t(record.loc)),
+      ])
+  and serialize_Migrate_parsetree__Ast_407__Parsetree__attribute:
+    _Migrate_parsetree__Ast______Parsetree__attribute => target =
     value => {
       let (arg0, arg1) = value;
       Json.Array([
-        serialize_Asttypes____loc(value => Json.String(value), arg0),
-        serialize_Parsetree____payload(arg1),
+        serialize_Migrate_parsetree__Ast_407__Asttypes__loc(
+          value => Json.String(value),
+          arg0,
+        ),
+        serialize_Migrate_parsetree__Ast_407__Parsetree__payload(arg1),
       ]);
     }
-  and serialize_Parsetree____attributes: _Parsetree__attributes => target =
+  and serialize_Migrate_parsetree__Ast_407__Parsetree__attributes:
+    _Migrate_parsetree__Ast______Parsetree__attributes => target =
     value =>
-      Json.Array(Belt.List.map(value, serialize_Parsetree____attribute))
-  and serialize_Parsetree____core_type: _Parsetree__core_type => target = TransformHelpers.serialize_Parsetree____core_type
-  and serialize_Parsetree____expression: _Parsetree__expression => target = TransformHelpers.serialize_Parsetree____expression
-  and serialize_Parsetree____pattern: _Parsetree__pattern => target = TransformHelpers.serialize_Parsetree____pattern
-  and serialize_Parsetree____payload: _Parsetree__payload => target =
+      Json.Array(
+        Belt.List.map(
+          value,
+          serialize_Migrate_parsetree__Ast_407__Parsetree__attribute,
+        ),
+      )
+  and serialize_Migrate_parsetree__Ast_407__Parsetree__core_type:
+    _Migrate_parsetree__Ast______Parsetree__core_type => target = TransformHelpers.serialize_Migrate_parsetree__Ast_407__Parsetree__core_type
+  and serialize_Migrate_parsetree__Ast_407__Parsetree__expression:
+    _Migrate_parsetree__Ast______Parsetree__expression => target = TransformHelpers.serialize_Migrate_parsetree__Ast_407__Parsetree__expression
+  and serialize_Migrate_parsetree__Ast_407__Parsetree__pattern:
+    _Migrate_parsetree__Ast______Parsetree__pattern => target = TransformHelpers.serialize_Migrate_parsetree__Ast_407__Parsetree__pattern
+  and serialize_Migrate_parsetree__Ast_407__Parsetree__payload:
+    _Migrate_parsetree__Ast______Parsetree__payload => target =
     constructor =>
       switch (constructor) {
       | PStr(arg0) =>
         Json.Array([
           Json.String("PStr"),
-          serialize_Parsetree____structure(arg0),
+          serialize_Migrate_parsetree__Ast_407__Parsetree__structure(arg0),
         ])
       | PSig(arg0) =>
         Json.Array([
           Json.String("PSig"),
-          serialize_Parsetree____signature(arg0),
+          serialize_Migrate_parsetree__Ast_407__Parsetree__signature(arg0),
         ])
       | PTyp(arg0) =>
         Json.Array([
           Json.String("PTyp"),
-          serialize_Parsetree____core_type(arg0),
+          serialize_Migrate_parsetree__Ast_407__Parsetree__core_type(arg0),
         ])
       | [@implicit_arity] PPat(arg0, arg1) =>
         Json.Array([
           Json.String("PPat"),
-          serialize_Parsetree____pattern(arg0),
+          serialize_Migrate_parsetree__Ast_407__Parsetree__pattern(arg0),
           switch (arg1) {
           | None => Json.Null
-          | Some(v) => serialize_Parsetree____expression(v)
+          | Some(v) =>
+            serialize_Migrate_parsetree__Ast_407__Parsetree__expression(v)
           },
         ])
       }
-  and serialize_Parsetree____signature: _Parsetree__signature => target = TransformHelpers.serialize_Parsetree____signature
-  and serialize_Parsetree____structure: _Parsetree__structure => target = TransformHelpers.serialize_Parsetree____structure
+  and serialize_Migrate_parsetree__Ast_407__Parsetree__signature:
+    _Migrate_parsetree__Ast______Parsetree__signature => target = TransformHelpers.serialize_Migrate_parsetree__Ast_407__Parsetree__signature
+  and serialize_Migrate_parsetree__Ast_407__Parsetree__structure:
+    _Migrate_parsetree__Ast______Parsetree__structure => target = TransformHelpers.serialize_Migrate_parsetree__Ast_407__Parsetree__structure
   and serialize_SharedTypes__SimpleType__body:
     'arg0.
     ('arg0 => target, _SharedTypes__SimpleType__body('arg0)) => target
@@ -2986,7 +3085,7 @@ module Version1 = {
     value => {
       let (arg0, arg1, arg2) = value;
       Json.Array([
-        serialize_Analyze__TopTypes____moduleName(arg0),
+        Json.String(arg0),
         Json.Array(Belt.List.map(arg1, value => Json.String(value))),
         Json.String(arg2),
       ]);
@@ -3000,7 +3099,7 @@ module Version1 = {
         serialize_TypeMap__DigTypes____shortReference,
         ((arg0, arg1)) =>
           Json.Array([
-            serialize_Parsetree____attributes(arg0),
+            serialize_Migrate_parsetree__Ast_407__Parsetree__attributes(arg0),
             serialize_SharedTypes__SimpleType__declaration(
               serialize_TypeMap__DigTypes____typeSource(referenceTransformer),
               arg1,
@@ -3018,7 +3117,8 @@ module Version1 = {
         Json.Array([Json.String("Builtin"), Json.String(arg0)])
       | Public(arg0) =>
         Json.Array([Json.String("Public"), referenceTransformer(arg0)])
-      | NotFound => Json.Array([Json.String("NotFound")])
+      | NotFound(arg0) =>
+        Json.Array([Json.String("NotFound"), Json.String(arg0)])
       };
 };
 module Current = Version1;

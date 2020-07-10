@@ -10,7 +10,8 @@ let typesAndDependencies = tbl => {
         SharedTypes.SimpleType.usedSources(decl)
         ->Belt.List.keepMap(source =>
             switch (source) {
-            | TypeMap.DigTypes.NotFound => assert(false)
+            | TypeMap.DigTypes.NotFound(_) => None
+            // assert(false)
             | Builtin(_) => None
             | Public(s) => Some(s)
             }
@@ -39,22 +40,42 @@ let typesAndDependencies = tbl => {
        }
      );
 
+  // Printexc.
+
   let resolve = (source, items) => {
+    // print_endline("Resolve " ++ string_of_int(List.length(items)));
+    // print_endline(
+    //   Printexc.raw_backtrace_to_string(Printexc.get_callstack(100)),
+    // );
     let (unresolved, contents) =
-      items->Belt.List.reduce((false, []), ((unresolved, contents), item) =>
-        switch (item) {
-        | `Reference(inner) when inner == source => (unresolved, contents)
-        | `Reference(inner) => (true, collected->Hashtbl.find(inner) @ contents)
-        | `Plain(x) => (unresolved, [`Plain(x), ...contents])
-        }
+      List.fold_left(
+        ((unresolved, contents), item) =>
+          switch (item) {
+          | `Reference(inner) when inner == source => (unresolved, contents)
+          | `Reference(inner) => (
+              true,
+              collected->Hashtbl.find(inner) @ contents,
+            )
+          | `Plain(x) => (unresolved, [`Plain(x), ...contents])
+          },
+        (false, []),
+        items,
       );
+    // print_endline("Resolve1");
     Hashtbl.replace(collected, source, contents);
+    // print_endline("< Resolve");
     unresolved;
   };
 
   let rec loop = i => {
     let unresolved =
-      Hashtbl.fold((k, v, unresolved) => resolve(k, v) || unresolved, collected, false);
+      Hashtbl.to_seq(collected)->List.of_seq
+      |> List.fold_left(
+           (unresolved, (k, v)) => resolve(k, v) || unresolved,
+           false,
+         );
+    // let unresolved =
+    //   Hashtbl.fold((k, v, unresolved) => resolve(k, v) || unresolved, collected, false);
     if (unresolved) {
       if (i > 1000) {
         failwith("Failed to resolve in 1000 iterations");

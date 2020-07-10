@@ -2,8 +2,8 @@
 (library
   (public_name milk)
   ; (public_name milk)
-  (libraries reason-language-server.Util TypeMap Serde TypeMapSerde reason compiler-libs.common ocaml-migrate-parsetree ppx_tools.metaquot)
+  (libraries reason-language-server.Util TypeMap Serde TypeMapSerde reason compiler-libs.common ocaml-migrate-parsetree ppx_tools_versioned.metaquot_407)
   (flags :standard -open Util -w -A)
-  (preprocess (pps reason-language-server.Belt_ppx reason-language-server.Ppx_monads ppxlib.metaquot))
+  (preprocess (pps reason-language-server.Belt_ppx reason-language-server.Ppx_monads ppx_tools_versioned.metaquot_407))
   )
 

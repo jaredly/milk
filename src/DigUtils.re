@@ -1,3 +1,4 @@
+open Migrate_parsetree.Ast_407;
 
 let hashList = tbl => Hashtbl.fold((key, value, result) => [(key, value), ...result], tbl, []);
 

@@ -1,5 +1,6 @@
+open Migrate_parsetree.Ast_407;
 
-type shortReference = (Analyze.TopTypes.moduleName, list(string), string);
+type shortReference = (string, list(string), string);
 
 type reference = {
   uri: string,
@@ -10,28 +11,42 @@ type reference = {
   env: Query.queryEnv,
 };
 
-let toShortReference = ({moduleName, modulePath, name}) => (moduleName, modulePath, name);
+let toShortReference = ({moduleName, modulePath, name}) => (
+  moduleName,
+  modulePath,
+  name,
+);
 
 let showReference = ({moduleName, modulePath, name}) => {
-  String.concat(".", [moduleName] @ modulePath @ [name])
+  String.concat(".", [moduleName] @ modulePath @ [name]);
 };
 
 let referenceToLident = ({moduleName, modulePath, name}) => {
   switch (Longident.unflatten([moduleName] @ modulePath @ [name])) {
-    | None => assert(false)
-    | Some(lident) => lident
-  }
+  | None => assert(false)
+  | Some(lident) => lident
+  };
 };
 
 type typeSource('reference) =
   | Builtin(string)
   | Public('reference)
-  | NotFound;
+  | NotFound(string);
 
-let toShortSource = source => switch source {
+let toShortSource = source =>
+  switch (source) {
   | Builtin(s) => Builtin(s)
-  | NotFound => NotFound
+  | NotFound(s) => NotFound(s)
   | Public(r) => Public(toShortReference(r))
-};
+  };
 
-type typeMap('reference) = Hashtbl.t(shortReference, (Parsetree.attributes, SharedTypes.SimpleType.declaration(typeSource('reference))));
+type typeMap('reference) =
+  Hashtbl.t(
+    shortReference,
+    (
+      Parsetree.attributes,
+      SharedTypes.SimpleType.declaration(typeSource('reference)),
+    ),
+  );
+
+type typeMap2 = Parsetree.attributes;

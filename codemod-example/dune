@@ -3,4 +3,4 @@
   (public_name ExampleCodemod.exe)
   (libraries Codemod reason-language-server.Util TypeMap compiler-libs.common ocaml-migrate-parsetree reason)
   (flags :standard -open Util -w -9)
-  (preprocess (pps reason-language-server.Belt_ppx reason-language-server.Ppx_monads ppxlib.metaquot)))
+  (preprocess (pps reason-language-server.Belt_ppx reason-language-server.Ppx_monads ppx_tools_versioned.metaquot_407)))

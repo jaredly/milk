@@ -1,3 +1,4 @@
+open Migrate_parsetree.Ast_407;
 
 module type T = {
   let target: Parsetree.core_type;

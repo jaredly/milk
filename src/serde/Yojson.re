@@ -1,4 +1,5 @@
 
+open Migrate_parsetree.Ast_407;
 open Longident;
 open Parsetree;
 open Ast_helper;
@@ -27,7 +28,7 @@ let target = [%type: [ `Assoc(list((string, target)))
 
 let sourceTransformer = (~source, ~transformers, ~input) => {
   let body = switch source {
-  | DigTypes.NotFound => MakeSerializer.failer("Not found")
+  | DigTypes.NotFound(s) => MakeSerializer.failer("Not found: " ++ s)
   | Public((moduleName, modulePath, name)) =>
     makeIdent(Lident(MakeSerializer.transformerName(~moduleName, ~modulePath, ~name)))
   | Builtin("array") =>
@@ -98,7 +99,7 @@ let declSerializer = MakeSerializer.decl(serializeTransformer);
 
 
 let sourceTransformer = source => switch source {
-  | DigTypes.NotFound => failer("Not found")
+  | DigTypes.NotFound(s) => failer("Not found: " ++ s)
   | Public((moduleName, modulePath, name)) =>
     makeIdent(Lident(MakeDeserializer.transformerName(~moduleName, ~modulePath, ~name)))
   | Builtin("array") =>
