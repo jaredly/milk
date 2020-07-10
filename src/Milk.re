@@ -68,7 +68,7 @@ let loadTypeMap = config => {
   let lockedEntries =
     config.entries
     ->Belt.List.map(({file, type_, engines}) => {
-        print_endline(">> Locking " ++ file);
+        // print_endline(">> Locking " ++ file);
         let%try_force (moduleName, modulePath, name) =
           TypeMap.GetTypeMap.forInitialType(
             ~tbl,
@@ -76,7 +76,16 @@ let loadTypeMap = config => {
             Utils.toUri(Filename.concat(Sys.getcwd(), file)),
             type_,
           );
-        print_endline(">> Got map " ++ file);
+        // print_endline(
+        //   ">> Got map "
+        //   ++ file
+        //   ++ " -- "
+        //   ++ moduleName
+        //   ++ " "
+        //   ++ String.concat(", ", modulePath)
+        //   ++ " "
+        //   ++ name,
+        // );
         {
           Locked.moduleName,
           modulePath,
@@ -93,9 +102,9 @@ let loadTypeMap = config => {
         };
       });
 
-  print_endline("To simple map now");
+  // // print_endline("To simple map now");
   let x = TypeMap.GetTypeMap.toSimpleMap(tbl);
-  print_endline("Did it");
+  // print_endline("Did it");
   (state, x, lockedEntries);
 };
 
@@ -153,7 +162,6 @@ let main = (~upvert=false, ~override=false, ~json, configPath) => {
   TypeMapSerde.checkVersion(~upvert, ~configPath, config, json);
 
   let (state, currentTypeMap, lockedEntries) = loadTypeMap(config);
-  print_endline("loaded");
 
   let engines =
     TypeMapSerde.Config.engineConfigs(config.engines)
@@ -170,7 +178,6 @@ let main = (~upvert=false, ~override=false, ~json, configPath) => {
       );
 
   let lockFilePath = makeLockfilePath(configPath);
-  print_endline("a");
 
   let lockfile =
     Lockfile.parseLockfile(
@@ -180,20 +187,16 @@ let main = (~upvert=false, ~override=false, ~json, configPath) => {
       currentTypeMap,
       lockFilePath,
     );
-  print_endline("b");
 
   let lockedDeep =
     Belt.Array.concat(
       [|Hashtbl.create(0)|],
       lockfile.versions
       ->Belt.Array.mapWithIndex((_index, config) => {
-          print_endline("c1");
-
-          Lockdown.typesAndDependencies(config.typeMap);
+          Lockdown.typesAndDependencies(config.typeMap)
         }),
     );
 
-  print_endline("c");
   let typeModules = {
     let rec loop = version =>
       version > config.version
@@ -213,7 +216,6 @@ let main = (~upvert=false, ~override=false, ~json, configPath) => {
     loop(1);
   };
 
-  print_endline("d");
   let makeEngineModules = (engine, helpers) => {
     let rec loop = version =>
       version > config.version
@@ -246,21 +248,25 @@ let main = (~upvert=false, ~override=false, ~json, configPath) => {
       ]
       @ Engine.preamble
       @ loop(1)
-      @ [%str
-        module Current = [%m
-          Ast_helper.Mod.ident(
-            Location.mknoloc(
-              Longident.Lident(versionModuleName(config.version)),
+      @ [
+        Ast_helper.Str.module_(
+          Ast_helper.Mb.mk(
+            Location.mknoloc("Current"),
+            Ast_helper.Mod.ident(
+              Location.mknoloc(
+                Longident.Lident(versionModuleName(config.version)),
+              ),
             ),
-          )
-        ];
+          ),
+        ),
+      ]
+      @ [%str
         let parseVersion = [%e Engine.deserializeTransformer.parseVersion];
         let wrapWithVersion = [%e Engine.serializeTransformer.wrapWithVersion]
       ]
     );
   };
 
-  print_endline("e");
   let typeModuleStructures =
     typeModules
     @ Parsetree.[
@@ -274,7 +280,6 @@ let main = (~upvert=false, ~override=false, ~json, configPath) => {
       ];
   let warning = Parsetree.[[%stri [@ocaml.warning "-34-39"]]];
 
-  print_endline("f");
   switch (engines, config.lockedTypes) {
   | ([(engine, {output, helpers})], None) =>
     let body =
@@ -316,7 +321,6 @@ let main = (~upvert=false, ~override=false, ~json, configPath) => {
     });
   };
 
-  print_endline("g");
   let lockfileJson = TypeMapSerde.lockfileToJson(lockfile);
   Files.writeFileExn(
     lockFilePath,

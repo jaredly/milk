@@ -43,10 +43,10 @@ let typesAndDependencies = tbl => {
   // Printexc.
 
   let resolve = (source, items) => {
-    print_endline("Resolve " ++ string_of_int(List.length(items)));
-    print_endline(
-      Printexc.raw_backtrace_to_string(Printexc.get_callstack(100)),
-    );
+    // print_endline("Resolve " ++ string_of_int(List.length(items)));
+    // print_endline(
+    //   Printexc.raw_backtrace_to_string(Printexc.get_callstack(100)),
+    // );
     let (unresolved, contents) =
       List.fold_left(
         ((unresolved, contents), item) =>
@@ -61,9 +61,9 @@ let typesAndDependencies = tbl => {
         (false, []),
         items,
       );
-    print_endline("Resolve1");
+    // print_endline("Resolve1");
     Hashtbl.replace(collected, source, contents);
-    print_endline("< Resolve");
+    // print_endline("< Resolve");
     unresolved;
   };
 

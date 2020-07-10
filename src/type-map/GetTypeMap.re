@@ -62,7 +62,7 @@ let getFullType = (~env: Query.queryEnv, path, name) => {
 
 let mapSource = (~env, ~getModule, path) => {
   let resolved = Query.resolveFromCompilerPath(~env, ~getModule, path);
-  print_endline("Resolved " ++ Path.name(path));
+  // print_endline("Resolved " ++ Path.name(path));
   open Infix;
   let declared =
     switch (resolved) {
@@ -124,8 +124,8 @@ let recursiveMapSource = (~env, ~getModule, loop, path) => {
   let result = mapSource(~env, ~getModule, path);
   switch (result) {
   | Public({moduleName, modulePath: path, declared, name, env}) =>
-    print_endline("Public, looping again");
-    loop(~env, (moduleName, path, name), declared);
+    // print_endline("Public, looping again");
+    loop(~env, (moduleName, path, name), declared)
   | _ => ()
   };
 
@@ -146,8 +146,10 @@ let rec digType =
           t: SharedTypes.declared(SharedTypes.Type.t),
         ) =>
   if (!Hashtbl.mem(set, key)) {
-    let (a, b, c) = key;
-    print_endline("Dig " ++ a);
+    // let (a, b, c) = key;
+    // print_endline(
+    //   "Dig " ++ a ++ " : " ++ String.concat(", ", b) ++ " : " ++ c,
+    // );
     let loop = digType(~tbl, ~set, ~state, ~package, ~getModule);
     Hashtbl.replace(set, key, ());
     Hashtbl.replace(

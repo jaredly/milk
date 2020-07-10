@@ -8,13 +8,9 @@
         }
     },
     "entries": [
-        // {
-        //     "file": "src/type-map-serde/Config.re",
-        //     "type": "typeMap"
-        // },
         {
-            "file": "src/type-map/DigTypes.re",
-            "type": "typeMap2"
+            "file": "src/type-map-serde/Config.re",
+            "type": "serializableLockfile"
         },
         {
             "file": "src/type-map-serde/Config.re",
@@ -31,33 +27,28 @@
     ],
     "custom": [
         {
-            "module": "Ast_407",
+            "module": "Migrate_parsetree__Ast_407",
             "path": ["Parsetree"],
-            "name": "attributes"
-        },
-        {
-            "module": "Parsetree",
-            "path": [],
             "name": "signature"
         },
         {
-            "module": "Parsetree",
-            "path": [],
+            "module": "Migrate_parsetree__Ast_407",
+            "path": ["Parsetree"],
             "name": "structure"
         },
         {
-            "module": "Parsetree",
-            "path": [],
+            "module": "Migrate_parsetree__Ast_407",
+            "path": ["Parsetree"],
             "name": "core_type"
         },
         {
-            "module": "Parsetree",
-            "path": [],
+            "module": "Migrate_parsetree__Ast_407",
+            "path": ["Parsetree"],
             "name": "expression"
         },
         {
-            "module": "Parsetree",
-            "path": [],
+            "module": "Migrate_parsetree__Ast_407",
+            "path": ["Parsetree"],
             "name": "pattern"
         }
     ],
