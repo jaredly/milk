@@ -166,7 +166,7 @@ module Types1 = {
     )
   and _TypeMap__DigTypes__typeSource('reference) =
     TypeMap__DigTypes.typeSource('reference) =
-      | Builtin(string) | Public('reference) | NotFound;
+      | Builtin(string) | Public('reference) | NotFound(string);
 };
 let currentVersion = 1;
 type target = Json.t;
@@ -2347,7 +2347,7 @@ module Version1 = {
         }
       | Json.Array([Json.String(tag)])
       | Json.String(tag) when "NotFound" == tag =>
-        Ok(NotFound: _TypeMap__DigTypes__typeSource(arg0))
+        Ok(NotFound(""): _TypeMap__DigTypes__typeSource(arg0))
       | Json.Array([Json.String(tag), ..._]) =>
         Error(["Invalid constructor: " ++ tag])
       | _ => Error(["Expected an array"])
@@ -3019,7 +3019,7 @@ module Version1 = {
         Json.Array([Json.String("Builtin"), Json.String(arg0)])
       | Public(arg0) =>
         Json.Array([Json.String("Public"), referenceTransformer(arg0)])
-      | NotFound => Json.Array([Json.String("NotFound")])
+      | NotFound(_) => Json.Array([Json.String("NotFound")])
       };
 };
 module Current = Version1;

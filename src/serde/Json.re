@@ -14,7 +14,7 @@ let jsonObject = items => makeJson("Object", Some(makeList(items)));
 let jsonArray = items => makeJson("Array", Some(items));
 
 let sourceTransformer = (~source, ~transformers, ~input) => switch source {
-  | DigTypes.NotFound => MakeSerializer.failer("Source not found")
+  | DigTypes.NotFound(s) => MakeSerializer.failer("Source not found: " ++ s)
   | Public((moduleName, modulePath, name)) =>
     let ident = makeIdent(Lident(MakeSerializer.transformerName(~moduleName, ~modulePath, ~name)))
     switch transformers {
@@ -150,7 +150,7 @@ let declSerializer = MakeSerializer.decl(serializeTransformer);
 
 
 let sourceTransformer = source => switch source {
-  | DigTypes.NotFound => failer("Not found")
+  | DigTypes.NotFound(s) => failer("Not found: " ++ s)
   | Public((moduleName, modulePath, name)) =>
     makeIdent(Lident(MakeDeserializer.transformerName(~moduleName, ~modulePath, ~name)))
   | Builtin("array") =>

@@ -10,7 +10,7 @@ let typesAndDependencies = tbl => {
         SharedTypes.SimpleType.usedSources(decl)
         ->Belt.List.keepMap(source =>
             switch (source) {
-            | TypeMap.DigTypes.NotFound => None
+            | TypeMap.DigTypes.NotFound(_) => None
             // assert(false)
             | Builtin(_) => None
             | Public(s) => Some(s)
@@ -44,6 +44,9 @@ let typesAndDependencies = tbl => {
 
   let resolve = (source, items) => {
     print_endline("Resolve " ++ string_of_int(List.length(items)));
+    print_endline(
+      Printexc.raw_backtrace_to_string(Printexc.get_callstack(100)),
+    );
     let (unresolved, contents) =
       List.fold_left(
         ((unresolved, contents), item) =>

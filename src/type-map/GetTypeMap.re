@@ -103,7 +103,7 @@ let mapSource = (~env, ~getModule, path) => {
       Builtin(Ident.name(ident))
     | _ =>
       print_endline("!!! Not found " ++ Path.name(path));
-      NotFound;
+      NotFound(Path.name(path));
     }
   | Some(({name, modulePath} as declared, env)) =>
     let%try_force ((uri, moduleName), path) =

@@ -22,7 +22,7 @@ let showSource = (source, args) =>
   Ast_helper.Typ.constr(
     Location.mknoloc(
       switch (source) {
-      | TypeMap.DigTypes.NotFound => failwith("Not found type reference")
+      | TypeMap.DigTypes.NotFound(s) => failwith("Not found type reference: " ++ s)
       | Builtin(name) => Longident.Lident(name)
       | Public((moduleName, modulePath, name)) =>
         Longident.Lident(makeLockedTypeName(moduleName, modulePath, name))

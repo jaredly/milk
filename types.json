@@ -1,56 +1,44 @@
 {
-  "version": 2,
-  "schemaPropertyName": "milkSchemaVersion",
-  "engines": {
-    "rex-json": {
-      "output": "src/type-map-serde/Serde.re",
-      "helpers": "TransformHelpers"
-    }
-  },
-  "entries": [
-    {
-      "file": "src/type-map-serde/Config.re",
-      "type": "serializableLockfile"
+    "version": 1,
+    "schemaPropertyName": "milkSchemaVersion",
+    "engines": {
+        "rex-json": {
+            "output": "src/type-map-serde/Serde.re",
+            "helpers": "TransformHelpers"
+        }
     },
-    {
-      "file": "src/type-map-serde/Config.re",
-      "type": "t"
-    },
-    {
-      "file": "src/type-map-serde/Config.re",
-      "type": "simpleDeclaration"
-    },
-    {
-      "file": "src/type-map-serde/Config.re",
-      "type": "simpleExpr"
-    }
-  ],
-  "custom": [
-    {
-      "module": "Parsetree",
-      "path": [],
-      "name": "signature"
-    },
-    {
-      "module": "Parsetree",
-      "path": [],
-      "name": "structure"
-    },
-    {
-      "module": "Parsetree",
-      "path": [],
-      "name": "core_type"
-    },
-    {
-      "module": "Parsetree",
-      "path": [],
-      "name": "expression"
-    },
-    {
-      "module": "Parsetree",
-      "path": [],
-      "name": "pattern"
-    }
-  ],
-  "milkSchemaVersion": 1
+    "entries": [
+        {
+            "file": "src/type-map-serde/Config.re",
+            "type": "simpleExpr"
+        }
+    ],
+    "custom": [
+        {
+            "module": "Parsetree",
+            "path": [],
+            "name": "signature"
+        },
+        {
+            "module": "Parsetree",
+            "path": [],
+            "name": "structure"
+        },
+        {
+            "module": "Parsetree",
+            "path": [],
+            "name": "core_type"
+        },
+        {
+            "module": "Parsetree",
+            "path": [],
+            "name": "expression"
+        },
+        {
+            "module": "Parsetree",
+            "path": [],
+            "name": "pattern"
+        }
+    ],
+    "milkSchemaVersion": 1
 }
