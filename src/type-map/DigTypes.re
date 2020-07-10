@@ -1,6 +1,6 @@
 open Migrate_parsetree.Ast_407;
 
-type shortReference = (Analyze.TopTypes.moduleName, list(string), string);
+type shortReference = (string, list(string), string);
 
 type reference = {
   uri: string,

@@ -10,6 +10,18 @@
     "entries": [
         {
             "file": "src/type-map-serde/Config.re",
+            "type": "serializableLockfile"
+        },
+        {
+            "file": "src/type-map-serde/Config.re",
+            "type": "t"
+        },
+        {
+            "file": "src/type-map-serde/Config.re",
+            "type": "simpleDeclaration"
+        },
+        {
+            "file": "src/type-map-serde/Config.re",
             "type": "simpleExpr"
         }
     ],
